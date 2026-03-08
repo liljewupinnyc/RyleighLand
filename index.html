@@ -856,14 +856,574 @@ body {
 @supports (padding: env(safe-area-inset-top)) {
   .top-bar { padding-top: calc(10px + env(safe-area-inset-top)); }
 }
+
+/* ===== WELCOME SCREEN ===== */
+.welcome-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: linear-gradient(135deg, #87CEEB 0%, #4ADE80 40%, #22D3EE 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+}
+.welcome-overlay.hidden { display: none; }
+.welcome-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 2.2rem;
+  color: white;
+  text-shadow: 0 3px 12px rgba(0,0,0,0.2);
+  margin-bottom: 8px;
+  text-align: center;
+}
+.welcome-subtitle {
+  font-size: 1rem;
+  color: rgba(255,255,255,0.85);
+  margin-bottom: 24px;
+  text-align: center;
+}
+.player-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 360px;
+  margin-bottom: 16px;
+}
+.player-card {
+  background: rgba(255,255,255,0.92);
+  border-radius: 20px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  position: relative;
+}
+.player-card:active { transform: scale(0.97); }
+.player-card-avatar {
+  font-size: 2.4rem;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #E0F2FE, #D1FAE5);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.player-card-info { flex: 1; }
+.player-card-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.15rem;
+  color: #1F2937;
+}
+.player-card-grade {
+  font-size: 0.8rem;
+  color: #6B7280;
+  margin-bottom: 6px;
+}
+.player-card-progress {
+  height: 6px;
+  background: #E5E7EB;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.player-card-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4ADE80, #22D3EE);
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+.player-card-delete {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 0.8rem;
+  color: #D1D5DB;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+.player-card-delete:active { color: #EF4444; }
+.new-player-btn {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.1rem;
+  padding: 14px 36px;
+  border: 3px dashed rgba(255,255,255,0.6);
+  border-radius: 50px;
+  background: rgba(255,255,255,0.2);
+  color: white;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: all 0.2s;
+  width: 100%;
+  max-width: 360px;
+}
+.new-player-btn:active { background: rgba(255,255,255,0.35); }
+
+/* New player form */
+.new-player-form {
+  display: none;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 360px;
+  background: rgba(255,255,255,0.92);
+  border-radius: 24px;
+  padding: 28px 24px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+}
+.new-player-form.active { display: flex; }
+.form-label {
+  font-family: 'Fredoka One', cursive;
+  font-size: 0.9rem;
+  color: #374151;
+}
+.form-input {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 12px 16px;
+  border: 2px solid #E5E7EB;
+  border-radius: 14px;
+  outline: none;
+  color: #1F2937;
+  transition: border-color 0.2s;
+}
+.form-input:focus { border-color: #4ADE80; }
+.grade-picker {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.grade-btn {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 10px 8px;
+  border: 2px solid #E5E7EB;
+  border-radius: 12px;
+  background: white;
+  color: #374151;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: all 0.2s;
+}
+.grade-btn.selected {
+  border-color: #4ADE80;
+  background: #D1FAE5;
+  color: #065F46;
+}
+.avatar-picker {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.avatar-btn {
+  font-size: 1.8rem;
+  width: 50px;
+  height: 50px;
+  border: 2px solid #E5E7EB;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  touch-action: manipulation;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.avatar-btn.selected {
+  border-color: #4ADE80;
+  background: #D1FAE5;
+  transform: scale(1.1);
+}
+.form-actions {
+  display: flex;
+  gap: 10px;
+}
+.form-submit {
+  flex: 1;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1rem;
+  padding: 12px;
+  border: none;
+  border-radius: 50px;
+  background: linear-gradient(135deg, #4ADE80, #22D3EE);
+  color: white;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.form-cancel {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1rem;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 50px;
+  background: #E5E7EB;
+  color: #6B7280;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+/* ===== MATH OVERLAY ===== */
+.math-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+.math-overlay.active { display: flex; }
+.math-card {
+  background: white;
+  border-radius: 28px;
+  padding: 32px 28px;
+  max-width: 380px;
+  width: 100%;
+  text-align: center;
+  animation: cardSlideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+  border: 3px solid #60A5FA;
+}
+.math-label {
+  font-family: 'Fredoka One', cursive;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #60A5FA;
+  margin-bottom: 6px;
+}
+.math-display {
+  font-family: 'Fredoka One', cursive;
+  font-size: 4rem;
+  color: #1F2937;
+  margin: 8px 0;
+  line-height: 1.2;
+}
+.math-question {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.8rem;
+  color: #1F2937;
+  margin-bottom: 20px;
+}
+.math-choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.math-choice-btn {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.3rem;
+  padding: 16px 12px;
+  border: 3px solid #E5E7EB;
+  border-radius: 16px;
+  background: white;
+  color: #1F2937;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: all 0.2s;
+  min-height: 60px;
+}
+.math-choice-btn:active { transform: scale(0.95); }
+.math-choice-btn.correct {
+  border-color: #4ADE80;
+  background: #D1FAE5;
+  color: #065F46;
+  animation: popIn 0.4s ease;
+}
+.math-choice-btn.wrong {
+  border-color: #EF4444;
+  background: #FEE2E2;
+  animation: shake 0.4s ease;
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(6px); }
+}
+.math-score {
+  font-size: 0.8rem;
+  color: #9CA3AF;
+  margin-top: 12px;
+}
+
+/* ===== PROFILE SWITCH BTN ===== */
+.profile-switch-btn {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.06);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  touch-action: manipulation;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== SKY LAYER (3D) ===== */
+.sky-layer {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  transition: background 1.5s ease;
+  pointer-events: none;
+}
+.sky-cloud {
+  position: absolute;
+  background: rgba(255,255,255,0.3);
+  border-radius: 50px;
+  animation: skyCloudDrift linear infinite;
+}
+@keyframes skyCloudDrift {
+  0% { transform: translateX(-120px); }
+  100% { transform: translateX(calc(100vw + 120px)); }
+}
+
+/* ===== DEPTH LAYERS (3D parallax) ===== */
+.zone-scene::before,
+.zone-scene::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Far background layer (mountains/hills silhouette) */
+.zone-scene::before {
+  height: 40%;
+  opacity: 0.08;
+}
+/* Near foreground layer (ground mist/haze) */
+.zone-scene::after {
+  height: 15%;
+  opacity: 0.12;
+}
+
+/* Zone-specific depth layers */
+.zone-forest::before {
+  background: radial-gradient(ellipse 100% 80% at 15% 100%, #0D3B0D, transparent 60%),
+              radial-gradient(ellipse 100% 80% at 85% 100%, #0D3B0D, transparent 60%);
+}
+.zone-forest::after {
+  background: linear-gradient(0deg, rgba(34,197,94,0.3), transparent);
+}
+.zone-lake::before {
+  background: radial-gradient(ellipse 120% 60% at 50% 100%, #1E3A5F, transparent 70%);
+}
+.zone-lake::after {
+  background: linear-gradient(0deg, rgba(96,165,250,0.25), transparent);
+}
+.zone-garden::before {
+  background: radial-gradient(ellipse 80% 80% at 20% 100%, #86198F33, transparent 50%),
+              radial-gradient(ellipse 80% 80% at 80% 100%, #C026D333, transparent 50%);
+}
+.zone-garden::after {
+  background: linear-gradient(0deg, rgba(251,191,36,0.15), transparent);
+}
+.zone-mountain::before {
+  background:
+    radial-gradient(ellipse 60% 90% at 10% 100%, #0F172A, transparent 50%),
+    radial-gradient(ellipse 70% 100% at 50% 100%, #1E293B, transparent 55%),
+    radial-gradient(ellipse 60% 90% at 90% 100%, #0F172A, transparent 50%);
+  opacity: 0.15;
+}
+.zone-mountain::after {
+  background: linear-gradient(0deg, rgba(99,102,241,0.15), transparent);
+}
+.zone-castle::before {
+  background: radial-gradient(ellipse 100% 80% at 50% 100%, #78350F44, transparent 60%);
+}
+.zone-castle::after {
+  background: linear-gradient(0deg, rgba(251,191,36,0.2), transparent);
+}
+
+/* ===== PATH PERSPECTIVE ===== */
+.path-svg {
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+/* ===== NODE DEPTH SCALING ===== */
+.node {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.node.depth-far { transform: translate(-50%, -50%) scale(0.82); opacity: 0.7; }
+.node.depth-mid { transform: translate(-50%, -50%) scale(0.91); opacity: 0.85; }
+.node.depth-near { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+.node.current { transform: translate(-50%, -50%) scale(1.05) !important; opacity: 1 !important; }
+
+/* ===== ENHANCED PARTICLES ===== */
+/* Falling leaf */
+.falling-leaf {
+  position: absolute;
+  font-size: 14px;
+  pointer-events: none;
+  animation: leafFall linear infinite;
+  opacity: 0.6;
+}
+@keyframes leafFall {
+  0% { transform: translateY(-20px) rotate(0deg) translateX(0); opacity: 0; }
+  10% { opacity: 0.7; }
+  90% { opacity: 0.5; }
+  100% { transform: translateY(600px) rotate(720deg) translateX(80px); opacity: 0; }
+}
+
+/* Fog/mist layer */
+.mist-layer {
+  position: absolute;
+  left: -10%;
+  width: 120%;
+  height: 30%;
+  bottom: 0;
+  pointer-events: none;
+  background: linear-gradient(0deg, rgba(255,255,255,0.2) 0%, transparent 100%);
+  animation: mistDrift 12s ease-in-out infinite;
+}
+@keyframes mistDrift {
+  0%, 100% { transform: translateX(0); opacity: 0.4; }
+  50% { transform: translateX(3%); opacity: 0.6; }
+}
+
+/* Floating petal */
+.floating-petal {
+  position: absolute;
+  pointer-events: none;
+  width: 6px;
+  height: 8px;
+  border-radius: 50% 50% 50% 0;
+  animation: petalFloat linear infinite;
+  opacity: 0.7;
+}
+@keyframes petalFloat {
+  0% { transform: translateY(-10px) rotate(0deg) translateX(0); opacity: 0; }
+  10% { opacity: 0.7; }
+  90% { opacity: 0.4; }
+  100% { transform: translateY(500px) rotate(540deg) translateX(-60px); opacity: 0; }
+}
+
+/* Shooting star */
+.shooting-star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow: 0 0 4px 2px rgba(255,255,255,0.6);
+  animation: shootingStar linear infinite;
+  opacity: 0;
+}
+@keyframes shootingStar {
+  0% { transform: translate(0, 0) scale(0); opacity: 0; }
+  5% { opacity: 1; transform: scale(1); }
+  30% { opacity: 0.8; }
+  40% { transform: translate(120px, 80px) scale(0.3); opacity: 0; }
+  100% { opacity: 0; }
+}
+.shooting-star::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 100%;
+  width: 40px; height: 1px;
+  background: linear-gradient(to left, white, transparent);
+}
+
+/* Castle firework burst */
+.firework-burst {
+  position: absolute;
+  pointer-events: none;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  animation: fireworkPop ease-out infinite;
+  opacity: 0;
+}
+@keyframes fireworkPop {
+  0% { transform: scale(0); opacity: 0; }
+  10% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(2.5); opacity: 0.8; box-shadow: 0 0 12px 4px currentColor; }
+  100% { transform: scale(4); opacity: 0; }
+}
+
+/* Node hover/press polish */
+.node-circle {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.node.next .node-circle:active {
+  transform: scale(0.92);
+}
+.node.current .node-circle {
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+}
 </style>
 </head>
 <body>
 
+<!-- SKY LAYER -->
+<div class="sky-layer" id="skyLayer"></div>
+
+<!-- WELCOME SCREEN -->
+<div class="welcome-overlay" id="welcomeScreen">
+  <div class="welcome-title">🐺 Ryleigh Land 🌲</div>
+  <div class="welcome-subtitle">Choose your adventurer!</div>
+  <div class="player-cards" id="playerCards"></div>
+  <button class="new-player-btn" id="newPlayerBtn" onclick="showNewPlayerForm()">+ New Player</button>
+  <div class="new-player-form" id="newPlayerForm">
+    <div class="form-label">What's your name?</div>
+    <input class="form-input" id="formName" type="text" placeholder="Enter name..." maxlength="20" autocomplete="off">
+    <div class="form-label">How old are you?</div>
+    <div class="grade-picker" id="agePicker">
+      <button class="grade-btn" data-age="4" onclick="pickAge(this)">4</button>
+      <button class="grade-btn" data-age="5" onclick="pickAge(this)">5</button>
+      <button class="grade-btn" data-age="6" onclick="pickAge(this)">6</button>
+      <button class="grade-btn" data-age="7" onclick="pickAge(this)">7</button>
+      <button class="grade-btn" data-age="8" onclick="pickAge(this)">8+</button>
+    </div>
+    <div class="form-label">Pick your avatar!</div>
+    <div class="avatar-picker" id="avatarPicker">
+      <button class="avatar-btn" data-avatar="🐺" onclick="pickAvatar(this)">🐺</button>
+      <button class="avatar-btn" data-avatar="🦄" onclick="pickAvatar(this)">🦄</button>
+      <button class="avatar-btn" data-avatar="🐱" onclick="pickAvatar(this)">🐱</button>
+      <button class="avatar-btn" data-avatar="🐶" onclick="pickAvatar(this)">🐶</button>
+      <button class="avatar-btn" data-avatar="🦊" onclick="pickAvatar(this)">🦊</button>
+      <button class="avatar-btn" data-avatar="🐼" onclick="pickAvatar(this)">🐼</button>
+      <button class="avatar-btn" data-avatar="🦋" onclick="pickAvatar(this)">🦋</button>
+      <button class="avatar-btn" data-avatar="🌟" onclick="pickAvatar(this)">🌟</button>
+    </div>
+    <div class="form-actions">
+      <button class="form-cancel" onclick="hideNewPlayerForm()">Back</button>
+      <button class="form-submit" onclick="createNewPlayer()">Let's Go!</button>
+    </div>
+  </div>
+</div>
+
 <!-- STICKY TOP BAR -->
 <div class="top-bar">
-  <div class="top-bar-inner">
-    <div class="game-title">🐺 Ryleigh Land 🌲</div>
+  <div class="top-bar-inner" style="position:relative">
+    <button class="profile-switch-btn" onclick="showWelcomeScreen()">👤</button>
+    <div class="game-title" id="gameTitle">🐺 Ryleigh Land 🌲</div>
     <div class="stats-row">
       <div class="stat-pill">📍 <span id="posDisplay">0</span>/100</div>
       <div class="stat-pill">✅ <span id="challengeCount">0</span></div>
@@ -885,7 +1445,7 @@ body {
   </div>
 
   <div class="reset-link">
-    <button class="reset-btn" onclick="resetGame()">🔄 Start New Adventure</button>
+    <button class="reset-btn" onclick="confirmReset()">🔄 Start New Adventure</button>
   </div>
 </div>
 
@@ -893,8 +1453,7 @@ body {
 <div class="bottom-bar">
   <div class="bottom-bar-inner">
     <button class="reset-icon-btn" onclick="confirmReset()" title="Reset Game">🔄</button>
-    <div class="spin-result" id="spinResult"></div>
-    <button class="spin-btn" id="spinBtn" onclick="spin()">🎲 Spin!</button>
+    <button class="spin-btn" id="goBtn" onclick="advanceOneSpace()">👣 Go!</button>
   </div>
 </div>
 
@@ -927,6 +1486,17 @@ body {
   </div>
 </div>
 <div id="zoneBanner" class="zone-banner"></div>
+
+<!-- MATH OVERLAY -->
+<div class="math-overlay" id="mathOverlay">
+  <div class="math-card">
+    <div class="math-label" id="mathLabel">🧮 Solve to continue!</div>
+    <div class="math-display" id="mathDisplay"></div>
+    <div class="math-question" id="mathQuestion"></div>
+    <div class="math-choices" id="mathChoices"></div>
+    <div class="math-score" id="mathScore"></div>
+  </div>
+</div>
 
 <script>
 // ===== GAME DATA =====
@@ -995,25 +1565,176 @@ const ZONES = [
   },
 ];
 
-// ===== STATE =====
-let state = loadState();
+// ===== PROFILE SYSTEM =====
+const STORAGE_KEY = 'ryleighLand_profiles';
+const GRADE_LABELS = { '-1': 'Pre-K', '0': 'Kindergarten', '1': '1st Grade', '2': '2nd Grade' };
+const AVATARS = ['🐺','🦄','🐱','🐶','🦊','🐼','🦋','🌟'];
 
-function defaultState() {
-  return { position: 0, challenges: 0, stars: 0, prizes: 0, log: [], prizeIndex: 0, streak: 0, lastZone: -1 };
+function defaultGameState() {
+  return { position: 0, challenges: 0, stars: 0, prizes: 0, log: [], prizeIndex: 0, streak: 0, lastZone: -1, mathCorrect: 0, mathTotal: 0 };
 }
 
-function loadState() {
+function defaultProfiles() {
+  return {
+    activePlayerId: null,
+    players: [
+      { id: 'ryleigh', name: 'Ryleigh', grade: 2, avatar: '🐺', gameState: defaultGameState() }
+    ]
+  };
+}
+
+function loadProfiles() {
   try {
-    const s = JSON.parse(localStorage.getItem('ryleighLand'));
-    if (!s) return defaultState();
-    if (s.streak === undefined) s.streak = 0;
-    if (s.lastZone === undefined) s.lastZone = -1;
-    return s;
-  } catch { return defaultState(); }
+    // Migrate old format
+    const old = localStorage.getItem('ryleighLand');
+    if (old) {
+      const oldState = JSON.parse(old);
+      if (oldState && oldState.position !== undefined) {
+        if (!oldState.streak) oldState.streak = 0;
+        if (!oldState.lastZone) oldState.lastZone = -1;
+        if (!oldState.mathCorrect) oldState.mathCorrect = 0;
+        if (!oldState.mathTotal) oldState.mathTotal = 0;
+        const profiles = defaultProfiles();
+        profiles.players[0].gameState = oldState;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(profiles));
+        localStorage.removeItem('ryleighLand');
+        return profiles;
+      }
+    }
+    const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (data && data.players) return data;
+    return defaultProfiles();
+  } catch { return defaultProfiles(); }
+}
+
+function saveProfiles() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(profiles));
+}
+
+let profiles = loadProfiles();
+let activePlayer = null;
+let state = defaultGameState();
+
+function getActivePlayer() {
+  if (!profiles.activePlayerId) return null;
+  return profiles.players.find(p => p.id === profiles.activePlayerId) || null;
+}
+
+function switchToPlayer(playerId) {
+  profiles.activePlayerId = playerId;
+  activePlayer = getActivePlayer();
+  if (activePlayer) {
+    state = activePlayer.gameState;
+    document.getElementById('gameTitle').textContent = activePlayer.avatar + ' ' + activePlayer.name + "'s Adventure";
+  }
+  saveProfiles();
 }
 
 function saveState() {
-  localStorage.setItem('ryleighLand', JSON.stringify(state));
+  if (activePlayer) {
+    activePlayer.gameState = state;
+    saveProfiles();
+  }
+}
+
+// ===== WELCOME SCREEN =====
+function renderWelcomeScreen() {
+  const container = document.getElementById('playerCards');
+  container.innerHTML = '';
+  profiles.players.forEach(p => {
+    const pct = Math.round((p.gameState.position / TOTAL_SPACES) * 100);
+    const card = document.createElement('div');
+    card.className = 'player-card';
+    card.onclick = () => { startGame(p.id); };
+    card.innerHTML = `
+      <div class="player-card-avatar">${p.avatar}</div>
+      <div class="player-card-info">
+        <div class="player-card-name">${p.name}</div>
+        <div class="player-card-grade">${GRADE_LABELS[String(p.grade)]} · Space ${p.gameState.position}/100</div>
+        <div class="player-card-progress"><div class="player-card-progress-fill" style="width:${pct}%"></div></div>
+      </div>
+      ${p.id !== 'ryleigh' ? '<button class="player-card-delete" onclick="event.stopPropagation();deletePlayer(\'' + p.id + '\')">✕</button>' : ''}
+    `;
+    container.appendChild(card);
+  });
+}
+
+function showWelcomeScreen() {
+  hideNewPlayerForm();
+  renderWelcomeScreen();
+  document.getElementById('welcomeScreen').classList.remove('hidden');
+}
+
+function startGame(playerId) {
+  switchToPlayer(playerId);
+  document.getElementById('welcomeScreen').classList.add('hidden');
+  sceneryBuilt = false;
+  lastAnnouncedZone = activePlayer ? activePlayer.gameState.lastZone : -1;
+  updateUI();
+  setTimeout(() => scrollToCurrentNode(false), 100);
+}
+
+let formAge = null;
+let formAvatar = null;
+
+function ageToGrade(age) {
+  if (age <= 4) return -1;  // Pre-K: letter/number recognition
+  if (age <= 5) return 0;   // Kindergarten: letter/number recognition
+  if (age <= 6) return 1;   // 1st grade: single-digit math
+  return 2;                  // 2nd grade+: double-digit math
+}
+
+function gradeLabel(grade) {
+  return GRADE_LABELS[String(grade)] || '2nd Grade';
+}
+
+function showNewPlayerForm() {
+  document.getElementById('newPlayerBtn').style.display = 'none';
+  document.getElementById('playerCards').style.display = 'none';
+  document.getElementById('newPlayerForm').classList.add('active');
+  document.getElementById('formName').value = '';
+  formAge = null; formAvatar = null;
+  document.querySelectorAll('#agePicker .grade-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('.avatar-btn').forEach(b => b.classList.remove('selected'));
+}
+
+function hideNewPlayerForm() {
+  document.getElementById('newPlayerBtn').style.display = '';
+  document.getElementById('playerCards').style.display = '';
+  document.getElementById('newPlayerForm').classList.remove('active');
+}
+
+function pickAge(btn) {
+  document.querySelectorAll('#agePicker .grade-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  formAge = parseInt(btn.dataset.age);
+}
+
+function pickAvatar(btn) {
+  document.querySelectorAll('.avatar-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  formAvatar = btn.dataset.avatar;
+}
+
+function createNewPlayer() {
+  const name = document.getElementById('formName').value.trim();
+  if (!name) { alert('Please enter a name!'); return; }
+  if (formAge === null) { alert('Please pick your age!'); return; }
+  if (!formAvatar) { alert('Please pick an avatar!'); return; }
+  const grade = ageToGrade(formAge);
+  const id = 'player_' + Date.now();
+  profiles.players.push({ id, name, grade, avatar: formAvatar, gameState: defaultGameState() });
+  saveProfiles();
+  hideNewPlayerForm();
+  startGame(id);
+}
+
+function deletePlayer(playerId) {
+  if (!confirm('Remove this player?')) return;
+  profiles.players = profiles.players.filter(p => p.id !== playerId);
+  if (profiles.activePlayerId === playerId) profiles.activePlayerId = null;
+  saveProfiles();
+  renderWelcomeScreen();
 }
 
 // ===== NODE POSITIONS =====
@@ -1048,9 +1769,10 @@ function buildScenery() {
   const zoneHeight = 20 * Y_SPACING;
   const pathTopPad = 90 + 30; // viewport padding-top + container padding
 
+  const ZONE_CLASSES = ['zone-forest','zone-lake','zone-garden','zone-mountain','zone-castle'];
   ZONES.forEach((zone, zi) => {
     const scene = document.createElement('div');
-    scene.className = `zone-scene`;
+    scene.className = `zone-scene ${ZONE_CLASSES[zi]}`;
     const top = pathTopPad + zi * zoneHeight - 50;
     scene.style.top = top + 'px';
     scene.style.height = (zoneHeight + 100) + 'px';
@@ -1135,6 +1857,18 @@ function buildForestScenery(container, h) {
     p.style.animationDelay = (Math.random() * 3) + 's';
     container.appendChild(p);
   }
+
+  // Falling leaves
+  const leafEmojis = ['🍂','🍃','🍁'];
+  for (let i = 0; i < 6; i++) {
+    const leaf = document.createElement('div');
+    leaf.className = 'falling-leaf';
+    leaf.textContent = leafEmojis[i % leafEmojis.length];
+    leaf.style.left = (5 + Math.random() * 90) + '%';
+    leaf.style.animationDuration = (8 + Math.random() * 6) + 's';
+    leaf.style.animationDelay = (-Math.random() * 10) + 's';
+    container.appendChild(leaf);
+  }
 }
 
 // --- Zone 2: Crystal Lake ---
@@ -1178,6 +1912,15 @@ function buildLakeScenery(container, h) {
     sp.style.animationDelay = (Math.random() * 2) + 's';
     container.appendChild(sp);
   }
+
+  // Gentle mist/fog
+  for (let i = 0; i < 2; i++) {
+    const mist = document.createElement('div');
+    mist.className = 'mist-layer';
+    mist.style.bottom = (i * 20) + '%';
+    mist.style.animationDelay = (i * 4) + 's';
+    container.appendChild(mist);
+  }
 }
 
 // --- Zone 3: Enchanted Garden ---
@@ -1209,6 +1952,18 @@ function buildGardenScenery(container, h) {
     b.style.animationDuration = (6 + Math.random() * 6) + 's';
     b.style.animationDelay = (Math.random() * 4) + 's';
     container.appendChild(b);
+  }
+
+  // Floating petals
+  const petalColors = ['#FF6B9D','#FBBF24','#C084FC','#FB923C','#F472B6'];
+  for (let i = 0; i < 8; i++) {
+    const petal = document.createElement('div');
+    petal.className = 'floating-petal';
+    petal.style.background = petalColors[i % petalColors.length];
+    petal.style.left = (5 + Math.random() * 90) + '%';
+    petal.style.animationDuration = (7 + Math.random() * 5) + 's';
+    petal.style.animationDelay = (-Math.random() * 8) + 's';
+    container.appendChild(petal);
   }
 }
 
@@ -1260,6 +2015,17 @@ function buildMountainScenery(container, h) {
     star.style.animationDelay = (Math.random() * 3) + 's';
     container.appendChild(star);
   }
+
+  // Shooting stars
+  for (let i = 0; i < 3; i++) {
+    const ss = document.createElement('div');
+    ss.className = 'shooting-star';
+    ss.style.left = (10 + Math.random() * 60) + '%';
+    ss.style.top = (5 + Math.random() * 30) + '%';
+    ss.style.animationDuration = (4 + Math.random() * 4) + 's';
+    ss.style.animationDelay = (i * 3 + Math.random() * 2) + 's';
+    container.appendChild(ss);
+  }
 }
 
 // --- Zone 5: Victory Castle ---
@@ -1308,6 +2074,20 @@ function buildCastleScenery(container, h) {
     flag.textContent = '🏴';
     flag.style.opacity = '0.3';
     container.appendChild(flag);
+  }
+
+  // Firework bursts
+  const fwColors = ['#EF4444','#FBBF24','#60A5FA','#C084FC','#4ADE80','#FB923C'];
+  for (let i = 0; i < 8; i++) {
+    const fw = document.createElement('div');
+    fw.className = 'firework-burst';
+    fw.style.left = (10 + Math.random() * 80) + '%';
+    fw.style.top = (10 + Math.random() * 60) + '%';
+    fw.style.color = fwColors[i % fwColors.length];
+    fw.style.background = fwColors[i % fwColors.length];
+    fw.style.animationDuration = (3 + Math.random() * 3) + 's';
+    fw.style.animationDelay = (i * 0.8 + Math.random() * 2) + 's';
+    container.appendChild(fw);
   }
 }
 
@@ -1398,6 +2178,18 @@ function buildPath() {
     num.className = 'node-num';
     num.textContent = spaceNum;
 
+    // Depth scaling based on distance from player
+    const dist = Math.abs(spaceNum - state.position);
+    if (isCurrent) {
+      node.classList.add('depth-near');
+    } else if (dist <= 4) {
+      node.classList.add('depth-near');
+    } else if (dist <= 10) {
+      node.classList.add('depth-mid');
+    } else {
+      node.classList.add('depth-far');
+    }
+
     node.appendChild(circle);
     node.appendChild(num);
     container.appendChild(node);
@@ -1420,7 +2212,7 @@ function buildPath() {
       this.style.display = 'none';
       const fallback = document.createElement('div');
       fallback.className = 'character-fallback';
-      fallback.textContent = '🐺';
+      fallback.textContent = activePlayer ? activePlayer.avatar : '🐺';
       charWrapper.appendChild(fallback);
     };
     charWrapper.appendChild(img);
@@ -1435,78 +2227,200 @@ function scrollToCurrentNode(smooth = true) {
   const pos = NODE_POSITIONS[targetIdx];
   const scrollTarget = pos.y + 90 - (window.innerHeight / 2);
   window.scrollTo({ top: Math.max(0, scrollTarget), behavior: smooth ? 'smooth' : 'instant' });
+  updateSkyForZone();
 }
 
-// ===== GAME LOGIC =====
-let spinning = false;
+// ===== GAME LOGIC (1-space + math) =====
+let turnState = 'IDLE'; // IDLE, MOVING, PRE_MATH, REVEAL, CARD_SHOWN, POST_MATH
 
-function spin() {
-  if (spinning) return;
+function setGoEnabled(enabled) {
+  const btn = document.getElementById('goBtn');
+  if (btn) btn.disabled = !enabled;
+}
+
+function advanceOneSpace() {
+  if (turnState !== 'IDLE') return;
   if (state.position >= TOTAL_SPACES) { showFinish(); return; }
 
-  spinning = true;
-  const btn = document.getElementById('spinBtn');
-  const resultEl = document.getElementById('spinResult');
-  btn.disabled = true;
+  turnState = 'MOVING';
+  setGoEnabled(false);
 
-  let count = 0;
-  const maxTicks = 12;
-  const interval = setInterval(() => {
-    resultEl.textContent = Math.ceil(Math.random() * 6);
-    count++;
-    if (count >= maxTicks) {
-      clearInterval(interval);
-      const roll = Math.ceil(Math.random() * 6);
-      resultEl.textContent = roll;
-      resultEl.style.animation = 'none';
-      void resultEl.offsetHeight;
-      resultEl.style.animation = 'popIn 0.4s ease';
+  const target = state.position + 1;
+  state.position = target;
+  buildPath();
+  updateStats();
+  scrollToCurrentNode(true);
 
-      let rawTarget = Math.min(state.position + roll, TOTAL_SPACES);
-      let landPos = rawTarget;
-      for (let s = state.position + 1; s <= rawTarget; s++) {
-        if (s % STAR_INTERVAL === 0) { landPos = s; break; }
-      }
+  setTimeout(() => {
+    if (target >= TOTAL_SPACES) {
+      saveState(); updateUI(); showFinish();
+      turnState = 'IDLE'; setGoEnabled(true); return;
+    }
 
-      animateMove(state.position, landPos, () => {
-        state.position = landPos;
-        if (landPos >= TOTAL_SPACES) {
-          saveState(); updateUI(); showFinish();
-          spinning = false; btn.disabled = false; return;
-        }
-        const isStar = landPos % STAR_INTERVAL === 0;
-        if (isStar) {
-          state.stars++; state.prizes++;
-          const prize = PRIZES[state.prizeIndex % PRIZES.length];
-          state.prizeIndex++;
-          state.log.push({ type: 'prize', text: prize.text, space: landPos });
-          saveState(); updateUI(); showPrize(prize);
-        } else {
-          state.challenges++;
-          state.streak++;
-          const challenge = CHALLENGES[Math.floor(Math.random() * CHALLENGES.length)];
-          state.log.push({ type: 'challenge', text: challenge.short, space: landPos });
-          saveState(); updateUI(); showChallenge(challenge);
-        }
-        checkZoneBanner(landPos);
-        spinning = false; btn.disabled = false;
+    // Determine what's on this space
+    const isStar = target % STAR_INTERVAL === 0;
+    if (isStar) {
+      state.stars++; state.prizes++;
+      const prize = PRIZES[state.prizeIndex % PRIZES.length];
+      state.prizeIndex++;
+      state.log.push({ type: 'prize', text: prize.text, space: target });
+      saveState(); updateUI();
+      // Pre-math before revealing prize
+      turnState = 'PRE_MATH';
+      showMathProblem(() => {
+        showPrize(prize);
+        turnState = 'REVEAL';
+      });
+    } else {
+      state.challenges++;
+      state.streak++;
+      const challenge = CHALLENGES[Math.floor(Math.random() * CHALLENGES.length)];
+      state.log.push({ type: 'challenge', text: challenge.short, space: target });
+      saveState(); updateUI();
+      // Pre-math before revealing challenge
+      turnState = 'PRE_MATH';
+      showMathProblem(() => {
+        showChallenge(challenge);
+        turnState = 'REVEAL';
       });
     }
-  }, 80);
+    checkZoneBanner(target);
+  }, 600);
 }
 
-function animateMove(from, to, callback) {
-  let current = from;
-  const step = () => {
-    current++;
-    if (current > to) { callback(); return; }
-    state.position = current;
-    buildPath();
-    updateStats();
-    scrollToCurrentNode(true);
-    setTimeout(step, 500);
-  };
-  step();
+// ===== MATH PROBLEM SYSTEM =====
+let mathCallback = null;
+
+function getPlayerGrade() {
+  return activePlayer ? activePlayer.grade : 2;
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function generateMathProblem(grade) {
+  if (grade <= 0) return generatePreKProblem(grade);
+  if (grade === 1) return generateGrade1Problem();
+  return generateGrade2Problem();
+}
+
+function generatePreKProblem(grade) {
+  if (Math.random() < 0.5) {
+    // Letter recognition
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const idx = Math.floor(Math.random() * 26);
+    const target = letters[idx];
+    const wrongs = new Set();
+    while (wrongs.size < 2) {
+      const w = letters[Math.floor(Math.random() * 26)];
+      if (w !== target) wrongs.add(w);
+    }
+    return { question: 'What letter is this?', display: target, choices: shuffle([target, ...wrongs]), answer: target };
+  } else {
+    const target = Math.floor(Math.random() * 10);
+    const wrongs = new Set();
+    while (wrongs.size < 2) {
+      const w = Math.floor(Math.random() * 10);
+      if (w !== target) wrongs.add(w);
+    }
+    return { question: 'What number is this?', display: String(target), choices: shuffle([target, ...wrongs].map(String)), answer: String(target) };
+  }
+}
+
+function generateGrade1Problem() {
+  const isAdd = Math.random() < 0.5;
+  let a, b, answer;
+  if (isAdd) {
+    a = Math.floor(Math.random() * 9) + 1;
+    b = Math.floor(Math.random() * 9) + 1;
+    answer = a + b;
+    return { question: `${a} + ${b} = ?`, display: null, choices: genNumberChoices(answer, 4, 0, 20), answer: String(answer) };
+  } else {
+    a = Math.floor(Math.random() * 9) + 2;
+    b = Math.floor(Math.random() * a) + 1;
+    answer = a - b;
+    return { question: `${a} - ${b} = ?`, display: null, choices: genNumberChoices(answer, 4, 0, 10), answer: String(answer) };
+  }
+}
+
+function generateGrade2Problem() {
+  const isAdd = Math.random() < 0.5;
+  let a, b, answer;
+  if (isAdd) {
+    a = Math.floor(Math.random() * 40) + 10;
+    b = Math.floor(Math.random() * 40) + 10;
+    answer = a + b;
+    return { question: `${a} + ${b} = ?`, display: null, choices: genNumberChoices(answer, 4, Math.max(0, answer - 15), answer + 15), answer: String(answer) };
+  } else {
+    a = Math.floor(Math.random() * 40) + 20;
+    b = Math.floor(Math.random() * 20) + 5;
+    if (b > a) [a, b] = [b, a];
+    answer = a - b;
+    return { question: `${a} - ${b} = ?`, display: null, choices: genNumberChoices(answer, 4, Math.max(0, answer - 12), answer + 12), answer: String(answer) };
+  }
+}
+
+function genNumberChoices(correct, count, min, max) {
+  const choices = new Set([correct]);
+  let attempts = 0;
+  while (choices.size < count && attempts < 50) {
+    const offset = Math.floor(Math.random() * 8) + 1;
+    const wrong = correct + (Math.random() < 0.5 ? offset : -offset);
+    if (wrong >= min && wrong <= max && wrong !== correct) choices.add(wrong);
+    attempts++;
+  }
+  while (choices.size < count) choices.add(correct + choices.size);
+  return shuffle([...choices].map(String));
+}
+
+function showMathProblem(callback) {
+  mathCallback = callback;
+  const grade = getPlayerGrade();
+  const problem = generateMathProblem(grade);
+
+  document.getElementById('mathDisplay').textContent = problem.display || '';
+  document.getElementById('mathDisplay').style.display = problem.display ? '' : 'none';
+  document.getElementById('mathQuestion').textContent = problem.question;
+  document.getElementById('mathScore').textContent = `Score: ${state.mathCorrect}/${state.mathTotal}`;
+
+  const choicesEl = document.getElementById('mathChoices');
+  choicesEl.innerHTML = '';
+  problem.choices.forEach(choice => {
+    const btn = document.createElement('button');
+    btn.className = 'math-choice-btn';
+    btn.textContent = choice;
+    btn.onclick = () => checkMathAnswer(btn, choice, problem);
+    choicesEl.appendChild(btn);
+  });
+
+  document.getElementById('mathOverlay').classList.add('active');
+}
+
+function checkMathAnswer(btn, selected, problem) {
+  state.mathTotal++;
+  if (String(selected) === String(problem.answer)) {
+    state.mathCorrect++;
+    btn.classList.add('correct');
+    saveState();
+    document.getElementById('mathScore').textContent = `Score: ${state.mathCorrect}/${state.mathTotal}`;
+    // Disable all buttons
+    document.querySelectorAll('.math-choice-btn').forEach(b => b.disabled = true);
+    setTimeout(() => {
+      document.getElementById('mathOverlay').classList.remove('active');
+      if (mathCallback) { mathCallback(); mathCallback = null; }
+    }, 600);
+  } else {
+    btn.classList.add('wrong');
+    saveState();
+    document.getElementById('mathScore').textContent = `Score: ${state.mathCorrect}/${state.mathTotal}`;
+    setTimeout(() => btn.classList.remove('wrong'), 400);
+  }
 }
 
 // ===== MODALS =====
@@ -1579,13 +2493,17 @@ function revealCard() {
 
 function completeCard() {
   document.getElementById('modal').classList.remove('active');
-  // Reset mystery front for next time
   document.getElementById('mysteryFront').querySelector('.mystery-question').textContent = '❓';
-  // Show celebration burst for challenges
   if (pendingReveal && pendingReveal.type === 'challenge') {
     showDoneBurst();
   }
   pendingReveal = null;
+  // Post-math to unlock next Go
+  turnState = 'POST_MATH';
+  showMathProblem(() => {
+    turnState = 'IDLE';
+    setGoEnabled(true);
+  });
 }
 
 function closeModal() { completeCard(); }
@@ -1673,14 +2591,18 @@ function updateStats() {
 function updateUI() { buildPath(); updateStats(); updateLog(); }
 
 function confirmReset() {
-  if (confirm('Reset the game? This will start Ryleigh back at space 1.')) {
+  const name = activePlayer ? activePlayer.name : 'the player';
+  if (confirm(`Reset the game? This will start ${name} back at space 1.`)) {
     resetGame();
   }
 }
 
 function resetGame() {
-  state = defaultState(); saveState();
-  document.getElementById('spinResult').textContent = '';
+  state = defaultGameState();
+  if (activePlayer) activePlayer.gameState = state;
+  saveState();
+  turnState = 'IDLE';
+  setGoEnabled(true);
   sceneryBuilt = false;
   updateUI();
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1696,9 +2618,50 @@ if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !navigator.standalone && !lo
   document.getElementById('installBanner').classList.add('show');
 }
 
+// ===== SKY LAYER =====
+function initSkyLayer() {
+  const sky = document.getElementById('skyLayer');
+  sky.style.background = 'linear-gradient(180deg, #87CEEB 0%, #B0E0E6 100%)';
+  for (let i = 0; i < 5; i++) {
+    const cloud = document.createElement('div');
+    cloud.className = 'sky-cloud';
+    cloud.style.width = (80 + Math.random() * 80) + 'px';
+    cloud.style.height = (20 + Math.random() * 15) + 'px';
+    cloud.style.top = (5 + i * 18) + '%';
+    cloud.style.animationDuration = (30 + Math.random() * 30) + 's';
+    cloud.style.animationDelay = (-Math.random() * 30) + 's';
+    sky.appendChild(cloud);
+  }
+}
+
+// Update sky color based on visible zone
+const SKY_COLORS = [
+  'linear-gradient(180deg, #87CEEB 0%, #B0E0E6 100%)',
+  'linear-gradient(180deg, #87CEEB 0%, #60A5FA 100%)',
+  'linear-gradient(180deg, #FDF2F8 0%, #FBCFE8 100%)',
+  'linear-gradient(180deg, #1E1B4B 0%, #312E81 100%)',
+  'linear-gradient(180deg, #FEF3C7 0%, #FBBF24 100%)',
+];
+
+function updateSkyForZone() {
+  if (!state.position) return;
+  const zi = Math.min(Math.floor((state.position - 1) / STAR_INTERVAL), 4);
+  document.getElementById('skyLayer').style.background = SKY_COLORS[zi];
+}
+
 // ===== INIT =====
-updateUI();
-setTimeout(() => scrollToCurrentNode(false), 100);
+initSkyLayer();
+
+if (profiles.activePlayerId && getActivePlayer()) {
+  // Resume last player
+  switchToPlayer(profiles.activePlayerId);
+  document.getElementById('welcomeScreen').classList.add('hidden');
+  updateUI();
+  setTimeout(() => { scrollToCurrentNode(false); updateSkyForZone(); }, 100);
+} else {
+  // Show welcome screen
+  showWelcomeScreen();
+}
 </script>
 </body>
 </html>
