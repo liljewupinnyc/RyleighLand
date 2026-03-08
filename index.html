@@ -1065,6 +1065,7 @@ body {
   width: 100%;
   max-width: 360px;
   margin-bottom: 16px;
+  overflow: visible;
 }
 .player-card {
   background: rgba(255,255,255,0.92);
@@ -1116,16 +1117,27 @@ body {
 }
 .player-card-delete {
   position: absolute;
-  top: 8px;
-  right: 10px;
-  background: none;
-  border: none;
-  font-size: 0.8rem;
-  color: #D1D5DB;
+  top: -8px;
+  right: -8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #EF4444;
+  border: 2px solid white;
+  color: white;
+  font-size: 0.85rem;
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  box-shadow: 0 2px 8px rgba(239,68,68,0.3);
+  transition: transform 0.2s;
+  z-index: 2;
+  line-height: 1;
 }
-.player-card-delete:active { color: #EF4444; }
+.player-card-delete:active { transform: scale(0.85); }
 .new-player-btn {
   font-family: 'Fredoka One', cursive;
   font-size: 1.1rem;
@@ -1336,6 +1348,72 @@ body {
   color: #9CA3AF;
   margin-top: 12px;
 }
+
+/* ===== SPEECH RECOGNITION MIC ===== */
+.mic-container { margin-top: 16px; }
+.mic-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.mic-divider::before,
+.mic-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #E5E7EB;
+}
+.mic-divider span {
+  font-size: 0.75rem;
+  color: #9CA3AF;
+  white-space: nowrap;
+}
+.mic-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 20px;
+  border: 3px solid #60A5FA;
+  border-radius: 16px;
+  background: #EFF6FF;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: all 0.3s ease;
+  font-family: 'Fredoka One', cursive;
+}
+.mic-btn:active { transform: scale(0.95); }
+.mic-icon { font-size: 1.5rem; }
+.mic-label {
+  font-size: 1rem;
+  color: #2563EB;
+}
+.mic-btn.listening {
+  border-color: #EF4444;
+  background: #FEF2F2;
+  animation: micPulse 1.5s ease-in-out infinite;
+}
+.mic-btn.listening .mic-label { color: #EF4444; }
+@keyframes micPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.3); }
+  50% { box-shadow: 0 0 0 12px rgba(239,68,68,0); }
+}
+.mic-btn.heard {
+  border-color: #4ADE80;
+  background: #F0FDF4;
+}
+.mic-btn.heard .mic-label { color: #065F46; }
+.mic-btn:disabled { opacity: 0.5; pointer-events: none; }
+.mic-status {
+  font-size: 0.8rem;
+  color: #9CA3AF;
+  margin-top: 8px;
+  min-height: 1.2em;
+  text-align: center;
+}
+.mic-status.error { color: #EF4444; }
 
 /* ===== CELEBRATION POPUP ===== */
 .celebration-overlay {
@@ -1936,6 +2014,14 @@ body {
     <div class="math-display" id="mathDisplay"></div>
     <div class="math-question" id="mathQuestion"></div>
     <div class="math-choices" id="mathChoices"></div>
+    <div class="mic-container" id="micContainer" style="display:none">
+      <div class="mic-divider"><span>or say your answer</span></div>
+      <button class="mic-btn" id="micBtn" onclick="startSpeechRecognition()">
+        <span class="mic-icon">🎤</span>
+        <span class="mic-label" id="micLabel">Tap to speak</span>
+      </button>
+      <div class="mic-status" id="micStatus"></div>
+    </div>
     <div class="math-score" id="mathScore"></div>
   </div>
 </div>
@@ -2142,7 +2228,7 @@ function renderWelcomeScreen() {
         <div class="player-card-progress"><div class="player-card-progress-fill" style="width:${pct}%"></div></div>
         ${badgeEmojis ? '<div class="player-card-badges">' + badgeEmojis + '</div>' : ''}
       </div>
-      ${p.id !== 'ryleigh' ? '<button class="player-card-delete" onclick="event.stopPropagation();deletePlayer(\'' + p.id + '\')">✕</button>' : ''}
+      ${p.id !== 'ryleigh' ? '<button class="player-card-delete" onclick="event.stopPropagation();deletePlayer(\'' + p.id + '\')">🗑️</button>' : ''}
     `;
     container.appendChild(card);
   });
@@ -3028,6 +3114,7 @@ function showMathProblem(callback) {
   mathCallback = callback;
   const grade = getPlayerGrade();
   const problem = generateProblem(grade);
+  currentProblem = problem;
 
   const displayEl = document.getElementById('mathDisplay');
   if (problem.isHtml) {
@@ -3056,6 +3143,19 @@ function showMathProblem(callback) {
     btn.onclick = () => checkMathAnswer(btn, choice, problem);
     choicesEl.appendChild(btn);
   });
+
+  // Show/hide speech recognition mic
+  const micContainer = document.getElementById('micContainer');
+  if (isSpeechSupported && canUseMicForProblem(problem)) {
+    micContainer.style.display = '';
+    document.getElementById('micBtn').disabled = false;
+    document.getElementById('micBtn').classList.remove('listening', 'heard');
+    document.getElementById('micLabel').textContent = 'Tap to speak';
+    document.getElementById('micStatus').textContent = '';
+    document.getElementById('micStatus').className = 'mic-status';
+  } else {
+    micContainer.style.display = 'none';
+  }
 
   document.getElementById('mathOverlay').classList.add('active');
 }
@@ -3094,6 +3194,9 @@ function showCelebration(callback) {
 }
 
 function checkMathAnswer(btn, selected, problem) {
+  stopSpeechRecognition();
+  const micBtn = document.getElementById('micBtn');
+  if (micBtn) micBtn.disabled = true;
   state.mathTotal++;
   if (String(selected) === String(problem.answer)) {
     state.mathCorrect++;
@@ -3117,6 +3220,266 @@ function checkMathAnswer(btn, selected, problem) {
     document.getElementById('mathScore').textContent = `Score: ${state.mathCorrect}/${state.mathTotal}`;
     setTimeout(() => btn.classList.remove('wrong'), 400);
   }
+}
+
+// ===== SPEECH RECOGNITION =====
+let speechRecognition = null;
+let currentProblem = null;
+let speechTimeout = null;
+let isSpeechSupported = false;
+
+try {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (SR) isSpeechSupported = true;
+} catch (e) {}
+
+const SPOKEN_NUMBERS = {
+  'zero':'0','oh':'0','one':'1','won':'1','two':'2','too':'2','to':'2',
+  'three':'3','tree':'3','four':'4','for':'4','five':'5','six':'6',
+  'seven':'7','eight':'8','ate':'8','nine':'9','ten':'10','eleven':'11',
+  'twelve':'12','thirteen':'13','fourteen':'14','fifteen':'15','sixteen':'16',
+  'seventeen':'17','eighteen':'18','nineteen':'19','twenty':'20',
+  'twenty one':'21','twenty-one':'21','twenty two':'22','twenty-two':'22',
+  'twenty three':'23','twenty-three':'23','twenty four':'24','twenty-four':'24',
+  'twenty five':'25','twenty-five':'25','twenty six':'26','twenty-six':'26',
+  'twenty seven':'27','twenty-seven':'27','twenty eight':'28','twenty-eight':'28',
+  'twenty nine':'29','twenty-nine':'29','thirty':'30',
+  'thirty one':'31','thirty-one':'31','thirty two':'32','thirty-two':'32',
+  'thirty three':'33','thirty-three':'33','thirty four':'34','thirty-four':'34',
+  'thirty five':'35','thirty-five':'35','thirty six':'36','thirty-six':'36',
+  'thirty seven':'37','thirty-seven':'37','thirty eight':'38','thirty-eight':'38',
+  'thirty nine':'39','thirty-nine':'39','forty':'40',
+  'forty one':'41','forty-one':'41','forty two':'42','forty-two':'42',
+  'forty three':'43','forty-three':'43','forty four':'44','forty-four':'44',
+  'forty five':'45','forty-five':'45','forty six':'46','forty-six':'46',
+  'forty seven':'47','forty-seven':'47','forty eight':'48','forty-eight':'48',
+  'forty nine':'49','forty-nine':'49','fifty':'50',
+  'fifty one':'51','fifty-one':'51','fifty two':'52','fifty-two':'52',
+  'fifty three':'53','fifty-three':'53','fifty four':'54','fifty-four':'54',
+  'fifty five':'55','fifty-five':'55','fifty six':'56','fifty-six':'56',
+  'fifty seven':'57','fifty-seven':'57','fifty eight':'58','fifty-eight':'58',
+  'fifty nine':'59','fifty-nine':'59','sixty':'60',
+  'sixty one':'61','sixty-one':'61','sixty two':'62','sixty-two':'62',
+  'sixty three':'63','sixty-three':'63','sixty four':'64','sixty-four':'64',
+  'sixty five':'65','sixty-five':'65','sixty six':'66','sixty-six':'66',
+  'sixty seven':'67','sixty-seven':'67','sixty eight':'68','sixty-eight':'68',
+  'sixty nine':'69','sixty-nine':'69','seventy':'70',
+  'seventy one':'71','seventy-one':'71','seventy two':'72','seventy-two':'72',
+  'seventy three':'73','seventy-three':'73','seventy four':'74','seventy-four':'74',
+  'seventy five':'75','seventy-five':'75','seventy six':'76','seventy-six':'76',
+  'seventy seven':'77','seventy-seven':'77','seventy eight':'78','seventy-eight':'78',
+  'seventy nine':'79','seventy-nine':'79','eighty':'80',
+  'eighty one':'81','eighty-one':'81','eighty two':'82','eighty-two':'82',
+  'eighty three':'83','eighty-three':'83','eighty four':'84','eighty-four':'84',
+  'eighty five':'85','eighty-five':'85','eighty six':'86','eighty-six':'86',
+  'eighty seven':'87','eighty-seven':'87','eighty eight':'88','eighty-eight':'88',
+  'eighty nine':'89','eighty-nine':'89','ninety':'90',
+  'ninety one':'91','ninety-one':'91','ninety two':'92','ninety-two':'92',
+  'ninety three':'93','ninety-three':'93','ninety four':'94','ninety-four':'94',
+  'ninety five':'95','ninety-five':'95','ninety six':'96','ninety-six':'96',
+  'ninety seven':'97','ninety-seven':'97','ninety eight':'98','ninety-eight':'98',
+  'ninety nine':'99','ninety-nine':'99','one hundred':'100','a hundred':'100','hundred':'100',
+};
+
+const SPOKEN_LETTERS = {
+  'ay':'A','a':'A','bee':'B','b':'B','be':'B','see':'C','sea':'C','c':'C',
+  'dee':'D','d':'D','ee':'E','e':'E','ef':'F','eff':'F','f':'F',
+  'gee':'G','g':'G','aitch':'H','h':'H','age':'H','eye':'I','i':'I',
+  'jay':'J','j':'J','kay':'K','k':'K','el':'L','l':'L','em':'M','m':'M',
+  'en':'N','n':'N','o':'O','pee':'P','p':'P','cue':'Q','q':'Q','queue':'Q',
+  'are':'R','r':'R','our':'R','es':'S','ess':'S','s':'S',
+  'tee':'T','tea':'T','t':'T','you':'U','u':'U','vee':'V','v':'V',
+  'double you':'W','w':'W','ex':'X','x':'X','why':'Y','y':'Y','wie':'Y',
+  'zee':'Z','z':'Z','zed':'Z',
+};
+
+const SPOKEN_HOURS = {
+  'one':'1','two':'2','three':'3','four':'4','five':'5','six':'6',
+  'seven':'7','eight':'8','nine':'9','ten':'10','eleven':'11','twelve':'12',
+};
+
+const SPOKEN_MINUTES = {
+  'fifteen':'15','thirty':'30','forty five':'45','forty-five':'45',
+};
+
+function classifyProblemType(problem) {
+  const q = problem.question;
+  if (q.includes('What letter')) return 'letter';
+  if (q.includes('What number')) return 'number';
+  if (q.includes('How many')) return 'counting';
+  if (q.includes('Which shape has')) return 'shape_emoji';
+  if (q.includes('What shape')) return 'shape';
+  if (q.includes('What time')) return 'time';
+  if (q.includes('spell')) return 'spelling';
+  if (q.includes('What comes next')) return 'pattern';
+  return 'math';
+}
+
+function canUseMicForProblem(problem) {
+  return classifyProblemType(problem) !== 'shape_emoji';
+}
+
+function normalizeSpokenTime(text) {
+  let t = text.toLowerCase().trim();
+  if (/^\d{1,2}:\d{2}$/.test(t)) return t;
+  t = t.replace(/o'clock/g, '').replace(/oclock/g, '').trim();
+  const tokens = t.split(/[\s-]+/);
+  let hour = null, minuteStartIdx = -1;
+  for (let i = 0; i < tokens.length; i++) {
+    if (/^\d{1,2}$/.test(tokens[i]) && parseInt(tokens[i]) >= 1 && parseInt(tokens[i]) <= 12) {
+      hour = tokens[i]; minuteStartIdx = i + 1; break;
+    }
+    if (SPOKEN_HOURS[tokens[i]]) {
+      hour = SPOKEN_HOURS[tokens[i]]; minuteStartIdx = i + 1; break;
+    }
+  }
+  if (!hour) return null;
+  if (minuteStartIdx >= tokens.length) return hour + ':00';
+  const minutePart = tokens.slice(minuteStartIdx).join(' ');
+  if (/^\d{1,2}$/.test(minutePart)) return hour + ':' + minutePart.padStart(2, '0');
+  if (SPOKEN_MINUTES[minutePart]) return hour + ':' + SPOKEN_MINUTES[minutePart];
+  if (SPOKEN_NUMBERS[minutePart]) return hour + ':' + SPOKEN_NUMBERS[minutePart].padStart(2, '0');
+  return null;
+}
+
+function normalizeSpeechToAnswer(spokenText, problem) {
+  const text = spokenText.trim().toLowerCase();
+  const type = classifyProblemType(problem);
+  if (text === problem.answer.toLowerCase()) return problem.answer;
+  switch (type) {
+    case 'letter': {
+      const upper = text.toUpperCase();
+      if (upper.length === 1 && /[A-Z]/.test(upper)) return upper;
+      return SPOKEN_LETTERS[text] || null;
+    }
+    case 'number': case 'counting': case 'math': case 'pattern': {
+      if (/^\d+$/.test(text)) return text;
+      return SPOKEN_NUMBERS[text] || null;
+    }
+    case 'time':
+      return normalizeSpokenTime(text);
+    case 'spelling':
+      return text;
+    case 'shape': {
+      const cap = text.charAt(0).toUpperCase() + text.slice(1);
+      return cap;
+    }
+    default: return text;
+  }
+}
+
+function startSpeechRecognition() {
+  if (!isSpeechSupported || !currentProblem) return;
+  const micBtn = document.getElementById('micBtn');
+  const micLabel = document.getElementById('micLabel');
+  const micStatus = document.getElementById('micStatus');
+  if (speechRecognition) { stopSpeechRecognition(); return; }
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  speechRecognition = new SR();
+  speechRecognition.lang = 'en-US';
+  speechRecognition.interimResults = false;
+  speechRecognition.maxAlternatives = 3;
+  speechRecognition.continuous = false;
+
+  micBtn.classList.add('listening');
+  micBtn.classList.remove('heard');
+  micLabel.textContent = 'Listening...';
+  micStatus.textContent = '';
+  micStatus.className = 'mic-status';
+
+  speechTimeout = setTimeout(() => {
+    stopSpeechRecognition();
+    micStatus.textContent = "Didn't hear anything. Tap to try again!";
+    micStatus.className = 'mic-status error';
+  }, 5000);
+
+  speechRecognition.onresult = (event) => {
+    clearTimeout(speechTimeout);
+    const results = event.results[0];
+    let matched = null;
+    for (let i = 0; i < results.length; i++) {
+      const transcript = results[i].transcript;
+      const normalized = normalizeSpeechToAnswer(transcript, currentProblem);
+      if (normalized && String(normalized) === String(currentProblem.answer)) {
+        matched = transcript; break;
+      }
+    }
+    stopSpeechRecognition();
+    if (matched) {
+      micBtn.classList.add('heard');
+      micLabel.textContent = '✅ "' + matched.trim() + '"';
+      handleSpeechCorrect();
+    } else {
+      const heard = results[0].transcript.trim();
+      micLabel.textContent = 'Tap to speak';
+      micStatus.textContent = 'Heard "' + heard + '" — not quite! Try again.';
+      micStatus.className = 'mic-status error';
+      handleSpeechWrong();
+    }
+  };
+
+  speechRecognition.onerror = (event) => {
+    clearTimeout(speechTimeout);
+    stopSpeechRecognition();
+    if (event.error === 'not-allowed') {
+      micStatus.textContent = 'Microphone access denied. Check Settings.';
+    } else if (event.error === 'no-speech') {
+      micStatus.textContent = 'No speech detected. Tap to try again!';
+    } else {
+      micStatus.textContent = 'Could not hear you. Try again!';
+    }
+    micStatus.className = 'mic-status error';
+  };
+
+  speechRecognition.onend = () => {
+    if (micBtn.classList.contains('listening')) {
+      micBtn.classList.remove('listening');
+      micLabel.textContent = 'Tap to speak';
+    }
+  };
+
+  speechRecognition.start();
+}
+
+function stopSpeechRecognition() {
+  clearTimeout(speechTimeout);
+  if (speechRecognition) {
+    try { speechRecognition.abort(); } catch(e) {}
+    speechRecognition = null;
+  }
+  const micBtn = document.getElementById('micBtn');
+  if (micBtn) {
+    micBtn.classList.remove('listening');
+  }
+}
+
+function handleSpeechCorrect() {
+  state.mathTotal++;
+  state.mathCorrect++;
+  state.mathStreak = (state.mathStreak || 0) + 1;
+  if (state.mathStreak > (state.bestMathStreak || 0)) state.bestMathStreak = state.mathStreak;
+  state.mathBonus = true;
+  saveState();
+  document.getElementById('mathScore').textContent = `Score: ${state.mathCorrect}/${state.mathTotal}`;
+  document.querySelectorAll('.math-choice-btn').forEach(b => b.disabled = true);
+  document.getElementById('micBtn').disabled = true;
+  setTimeout(() => {
+    document.getElementById('mathOverlay').classList.remove('active');
+    showCelebration(() => {
+      if (mathCallback) { mathCallback(); mathCallback = null; }
+    });
+  }, 600);
+}
+
+function handleSpeechWrong() {
+  state.mathTotal++;
+  state.mathStreak = 0;
+  saveState();
+  document.getElementById('mathScore').textContent = `Score: ${state.mathCorrect}/${state.mathTotal}`;
+  const micBtn = document.getElementById('micBtn');
+  micBtn.style.animation = 'shake 0.4s ease';
+  setTimeout(() => { micBtn.style.animation = ''; }, 400);
 }
 
 // ===== MODALS =====
