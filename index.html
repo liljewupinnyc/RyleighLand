@@ -1164,6 +1164,226 @@ body {
   margin-top: 12px;
 }
 
+/* ===== CELEBRATION POPUP ===== */
+.celebration-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+.celebration-overlay.active { display: flex; }
+.celebration-card {
+  text-align: center;
+  animation: celebBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes celebBounce {
+  0% { transform: scale(0.3) rotate(-10deg); opacity: 0; }
+  60% { transform: scale(1.1) rotate(3deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+.celeb-emoji {
+  font-size: 5rem;
+  animation: celebSpin 0.8s ease;
+  display: block;
+  margin-bottom: 10px;
+}
+@keyframes celebSpin {
+  0% { transform: scale(0) rotate(-180deg); }
+  60% { transform: scale(1.3) rotate(15deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+.celeb-phrase {
+  font-family: 'Fredoka One', cursive;
+  font-size: 2rem;
+  color: white;
+  text-shadow: 0 3px 12px rgba(0,0,0,0.4);
+  margin-bottom: 8px;
+}
+.celeb-bonus {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  color: #4ADE80;
+  font-weight: 800;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+.celeb-sparkle {
+  position: absolute;
+  width: 6px; height: 6px;
+  background: #FBBF24;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: celebSpark 1s ease-out forwards;
+}
+@keyframes celebSpark {
+  0% { transform: translate(0,0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--sx), var(--sy)) scale(0); opacity: 0; }
+}
+
+/* ===== BADGE POPUP ===== */
+.badge-popup {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1250;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+.badge-popup.active { display: flex; }
+.badge-card {
+  background: white;
+  border-radius: 28px;
+  padding: 32px 28px;
+  max-width: 320px;
+  width: 100%;
+  text-align: center;
+  animation: celebBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+  border: 3px solid #FBBF24;
+}
+.badge-emoji { font-size: 4rem; margin-bottom: 8px; }
+.badge-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #FBBF24;
+  margin-bottom: 4px;
+}
+.badge-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.5rem;
+  color: #1F2937;
+  margin-bottom: 6px;
+}
+.badge-desc {
+  font-size: 0.9rem;
+  color: #6B7280;
+}
+
+/* ===== LEADERBOARD ===== */
+.leaderboard {
+  max-width: 380px;
+  margin: 16px auto 0;
+  width: 100%;
+}
+.leaderboard-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1rem;
+  color: white;
+  text-align: center;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.leaderboard-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 14px;
+  padding: 8px 14px;
+  margin-bottom: 6px;
+}
+.lb-rank {
+  font-size: 1.3rem;
+  width: 30px;
+  text-align: center;
+}
+.lb-avatar { font-size: 1.3rem; }
+.lb-name {
+  font-weight: 800;
+  color: white;
+  font-size: 0.9rem;
+  flex: 1;
+}
+.lb-stats {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.8);
+  font-weight: 700;
+  text-align: right;
+}
+
+/* ===== BADGE ROW ON PLAYER CARD ===== */
+.player-card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin-top: 4px;
+  font-size: 0.7rem;
+}
+
+/* ===== CLOCK FACE ===== */
+.clock-face {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 4px solid #1F2937;
+  background: white;
+  margin: 0 auto;
+}
+.clock-face::before {
+  content: '12';
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.65rem;
+  font-weight: 900;
+  color: #1F2937;
+}
+.clock-tick {
+  position: absolute;
+  width: 2px;
+  height: 8px;
+  background: #1F2937;
+  top: 4px;
+  left: 50%;
+  transform-origin: 50% 56px;
+}
+.clock-hand-hour {
+  position: absolute;
+  width: 4px;
+  height: 30px;
+  background: #1F2937;
+  border-radius: 2px;
+  bottom: 50%;
+  left: calc(50% - 2px);
+  transform-origin: 50% 100%;
+}
+.clock-hand-minute {
+  position: absolute;
+  width: 3px;
+  height: 42px;
+  background: #EF4444;
+  border-radius: 2px;
+  bottom: 50%;
+  left: calc(50% - 1.5px);
+  transform-origin: 50% 100%;
+}
+.clock-center {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #1F2937;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
 /* ===== PROFILE SWITCH BTN ===== */
 .profile-switch-btn {
   position: absolute;
@@ -1498,19 +1718,63 @@ body {
   </div>
 </div>
 
+<!-- CELEBRATION POPUP -->
+<div class="celebration-overlay" id="mathCelebration">
+  <div class="celebration-card">
+    <div class="celeb-emoji" id="celebEmoji">🎉</div>
+    <div class="celeb-phrase" id="celebPhrase"></div>
+    <div class="celeb-bonus" id="celebBonus">✅ Correct = 2 bonus points!</div>
+  </div>
+</div>
+
+<!-- BADGE POPUP -->
+<div class="badge-popup" id="badgePopup">
+  <div class="badge-card">
+    <div class="badge-title">🏅 New Badge!</div>
+    <div class="badge-emoji" id="badgeEmoji"></div>
+    <div class="badge-name" id="badgeName"></div>
+    <div class="badge-desc" id="badgeDesc"></div>
+  </div>
+</div>
+
 <script>
 // ===== GAME DATA =====
-const CHALLENGES = [
-  { text: "Practice piano for 15 minutes 🎹", emoji: "🎹", short: "Piano Practice" },
-  { text: "Read a book for 20 minutes 📖", emoji: "📖", short: "Reading Time" },
-  { text: "Practice math problems for 15 minutes 🔢", emoji: "🔢", short: "Math Practice" },
-  { text: "Play softball with Mom or Dad ⚾", emoji: "⚾", short: "Softball" },
-  { text: "Play the playground game system for exercise! 🏃‍♀️", emoji: "🏃‍♀️", short: "Playground Games" },
-  { text: "Ride bikes or practice roller skating 🛼", emoji: "🛼", short: "Bikes / Skating" },
-  { text: "Help cook or bake something yummy with a parent 👩‍🍳", emoji: "👩‍🍳", short: "Cooking Adventure" },
-  { text: "Create an art project — draw, paint, or craft! 🎨", emoji: "🎨", short: "Art Project" },
-  { text: "Write a kind letter or draw a picture for someone you love 💌", emoji: "💌", short: "Kindness Letter" },
-];
+const CHALLENGES_BY_AGE = {
+  young: [
+    { text: "Color a picture for 10 minutes 🖍️", emoji: "🖍️", short: "Coloring" },
+    { text: "Build something cool with blocks 🧱", emoji: "🧱", short: "Block Building" },
+    { text: "Practice writing your name 3 times ✏️", emoji: "✏️", short: "Name Writing" },
+    { text: "Do 10 jumping jacks! 🤸", emoji: "🤸", short: "Jumping Jacks" },
+    { text: "Sing your favorite song out loud 🎤", emoji: "🎤", short: "Sing a Song" },
+    { text: "Put away 5 toys in the right spot 🧹", emoji: "🧹", short: "Toy Cleanup" },
+    { text: "Play catch with a parent for 5 minutes 🥎", emoji: "🥎", short: "Play Catch" },
+    { text: "Draw a picture of your family 👨‍👩‍👧", emoji: "👨‍👩‍👧", short: "Family Drawing" },
+    { text: "Practice counting to 20 out loud 🔢", emoji: "🔢", short: "Count to 20" },
+    { text: "Do a silly dance for 2 minutes 💃", emoji: "💃", short: "Silly Dance" },
+  ],
+  school: [
+    { text: "Practice piano for 15 minutes 🎹", emoji: "🎹", short: "Piano Practice" },
+    { text: "Read a book for 20 minutes 📖", emoji: "📖", short: "Reading Time" },
+    { text: "Practice math problems for 15 minutes 🔢", emoji: "🔢", short: "Math Practice" },
+    { text: "Play softball with Mom or Dad ⚾", emoji: "⚾", short: "Softball" },
+    { text: "Play the playground game system for exercise! 🏃‍♀️", emoji: "🏃‍♀️", short: "Playground Games" },
+    { text: "Ride bikes or practice roller skating 🛼", emoji: "🛼", short: "Bikes / Skating" },
+    { text: "Help cook or bake something yummy with a parent 👩‍🍳", emoji: "👩‍🍳", short: "Cooking Adventure" },
+    { text: "Create an art project — draw, paint, or craft! 🎨", emoji: "🎨", short: "Art Project" },
+    { text: "Write a kind letter or draw a picture for someone you love 💌", emoji: "💌", short: "Kindness Letter" },
+    { text: "Write 5 spelling words 3 times each 📝", emoji: "📝", short: "Spelling Practice" },
+    { text: "Read out loud to a parent for 10 minutes 🗣️", emoji: "🗣️", short: "Read Aloud" },
+    { text: "Do 20 sit-ups and 10 push-ups! 💪", emoji: "💪", short: "Mini Workout" },
+    { text: "Help organize your backpack for tomorrow 🎒", emoji: "🎒", short: "Backpack Check" },
+    { text: "Write in a journal — what happened today? 📓", emoji: "📓", short: "Journal Entry" },
+    { text: "Teach someone in your family something you learned 🧑‍🏫", emoji: "🧑‍🏫", short: "Be the Teacher" },
+  ],
+};
+
+function getChallengesForPlayer() {
+  const grade = activePlayer ? activePlayer.grade : 2;
+  return grade <= 0 ? CHALLENGES_BY_AGE.young : CHALLENGES_BY_AGE.school;
+}
 
 const PRIZES = [
   { text: "A new Tonie — Stitch! 💙🧵", emoji: "🧵" },
@@ -1571,7 +1835,7 @@ const GRADE_LABELS = { '-1': 'Pre-K', '0': 'Kindergarten', '1': '1st Grade', '2'
 const AVATARS = ['🐺','🦄','🐱','🐶','🦊','🐼','🦋','🌟'];
 
 function defaultGameState() {
-  return { position: 0, challenges: 0, stars: 0, prizes: 0, log: [], prizeIndex: 0, streak: 0, lastZone: -1, mathCorrect: 0, mathTotal: 0 };
+  return { position: 0, challenges: 0, stars: 0, prizes: 0, log: [], prizeIndex: 0, streak: 0, bestStreak: 0, lastZone: -1, mathCorrect: 0, mathTotal: 0, mathStreak: 0, bestMathStreak: 0, mathBonus: false, badges: [] };
 }
 
 function defaultProfiles() {
@@ -1643,6 +1907,8 @@ function renderWelcomeScreen() {
   container.innerHTML = '';
   profiles.players.forEach(p => {
     const pct = Math.round((p.gameState.position / TOTAL_SPACES) * 100);
+    const badges = (p.gameState.badges || []);
+    const badgeEmojis = badges.map(id => { const b = BADGES.find(x => x.id === id); return b ? b.emoji : ''; }).join('');
     const card = document.createElement('div');
     card.className = 'player-card';
     card.onclick = () => { startGame(p.id); };
@@ -1652,11 +1918,38 @@ function renderWelcomeScreen() {
         <div class="player-card-name">${p.name}</div>
         <div class="player-card-grade">${GRADE_LABELS[String(p.grade)]} · Space ${p.gameState.position}/100</div>
         <div class="player-card-progress"><div class="player-card-progress-fill" style="width:${pct}%"></div></div>
+        ${badgeEmojis ? '<div class="player-card-badges">' + badgeEmojis + '</div>' : ''}
       </div>
       ${p.id !== 'ryleigh' ? '<button class="player-card-delete" onclick="event.stopPropagation();deletePlayer(\'' + p.id + '\')">✕</button>' : ''}
     `;
     container.appendChild(card);
   });
+  renderLeaderboard();
+}
+
+function renderLeaderboard() {
+  let lb = document.getElementById('leaderboard');
+  if (!lb) {
+    lb = document.createElement('div');
+    lb.id = 'leaderboard';
+    lb.className = 'leaderboard';
+    const btn = document.getElementById('newPlayerBtn');
+    btn.parentNode.insertBefore(lb, btn);
+  }
+  if (profiles.players.length < 2) { lb.innerHTML = ''; return; }
+  const sorted = [...profiles.players].sort((a, b) => b.gameState.position - a.gameState.position);
+  const ranks = ['🥇','🥈','🥉'];
+  let html = '<div class="leaderboard-title">🏅 Leaderboard</div>';
+  sorted.forEach((p, i) => {
+    const rank = i < 3 ? ranks[i] : `${i + 1}`;
+    html += `<div class="leaderboard-row">
+      <div class="lb-rank">${rank}</div>
+      <div class="lb-avatar">${p.avatar}</div>
+      <div class="lb-name">${p.name}</div>
+      <div class="lb-stats">Space ${p.gameState.position} · ✅ ${p.gameState.challenges}</div>
+    </div>`;
+  });
+  lb.innerHTML = html;
 }
 
 function showWelcomeScreen() {
@@ -2274,7 +2567,9 @@ function advanceOneSpace() {
     } else {
       state.challenges++;
       state.streak++;
-      const challenge = CHALLENGES[Math.floor(Math.random() * CHALLENGES.length)];
+      if (state.streak > (state.bestStreak || 0)) state.bestStreak = state.streak;
+      const playerChallenges = getChallengesForPlayer();
+      const challenge = playerChallenges[Math.floor(Math.random() * playerChallenges.length)];
       state.log.push({ type: 'challenge', text: challenge.short, space: target });
       saveState(); updateUI();
       // Pre-math before revealing challenge
@@ -2304,36 +2599,82 @@ function shuffle(arr) {
   return a;
 }
 
-function generateMathProblem(grade) {
-  if (grade <= 0) return generatePreKProblem(grade);
-  if (grade === 1) return generateGrade1Problem();
-  return generateGrade2Problem();
+function generateProblem(grade) {
+  const r = Math.random();
+  if (grade <= 0) {
+    // Pre-K/K: 35% number, 25% letter, 20% counting, 20% shape
+    if (r < 0.35) return generateNumberRecognition();
+    if (r < 0.60) return generateLetterRecognition();
+    if (r < 0.80) return generateCounting();
+    return generateShapeRecognition();
+  }
+  if (grade === 1) {
+    // 1st: 40% math, 30% spelling, 30% patterns
+    if (r < 0.40) return generateGrade1Math();
+    if (r < 0.70) return generateSpelling(1);
+    return generatePattern(1);
+  }
+  // 2nd: 35% math, 25% time, 20% spelling, 20% patterns
+  if (r < 0.35) return generateGrade2Math();
+  if (r < 0.60) return generateTellingTime();
+  if (r < 0.80) return generateSpelling(2);
+  return generatePattern(2);
 }
 
-function generatePreKProblem(grade) {
-  if (Math.random() < 0.5) {
-    // Letter recognition
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const idx = Math.floor(Math.random() * 26);
-    const target = letters[idx];
-    const wrongs = new Set();
-    while (wrongs.size < 2) {
-      const w = letters[Math.floor(Math.random() * 26)];
-      if (w !== target) wrongs.add(w);
-    }
-    return { question: 'What letter is this?', display: target, choices: shuffle([target, ...wrongs]), answer: target };
+function generateLetterRecognition() {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const idx = Math.floor(Math.random() * 26);
+  const target = letters[idx];
+  const wrongs = new Set();
+  while (wrongs.size < 2) {
+    const w = letters[Math.floor(Math.random() * 26)];
+    if (w !== target) wrongs.add(w);
+  }
+  return { question: 'What letter is this?', display: target, choices: shuffle([target, ...wrongs]), answer: target };
+}
+
+function generateNumberRecognition() {
+  const target = Math.floor(Math.random() * 10);
+  const wrongs = new Set();
+  while (wrongs.size < 2) {
+    const w = Math.floor(Math.random() * 10);
+    if (w !== target) wrongs.add(w);
+  }
+  return { question: 'What number is this?', display: String(target), choices: shuffle([target, ...wrongs].map(String)), answer: String(target) };
+}
+
+function generateCounting() {
+  const emojis = ['🍎','🌟','🐱','🎈','🍪','🐶'];
+  const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+  const count = Math.floor(Math.random() * 7) + 2; // 2-8
+  const display = emoji.repeat(count);
+  const wrongs = new Set();
+  while (wrongs.size < 2) {
+    const w = Math.floor(Math.random() * 9) + 1;
+    if (w !== count) wrongs.add(w);
+  }
+  return { question: 'How many do you see?', display, choices: shuffle([count, ...wrongs].map(String)), answer: String(count) };
+}
+
+function generateShapeRecognition() {
+  const shapes = [
+    { name: 'triangle', sides: 3, display: '🔺' },
+    { name: 'square', sides: 4, display: '🟧' },
+    { name: 'circle', sides: 0, display: '🔵' },
+  ];
+  const r = Math.random();
+  if (r < 0.5) {
+    // "Which shape has X sides?"
+    const target = shapes[Math.floor(Math.random() * 2)]; // triangle or square
+    return { question: `Which shape has ${target.sides} sides?`, display: null, choices: shuffle(shapes.map(s => s.display)), answer: target.display };
   } else {
-    const target = Math.floor(Math.random() * 10);
-    const wrongs = new Set();
-    while (wrongs.size < 2) {
-      const w = Math.floor(Math.random() * 10);
-      if (w !== target) wrongs.add(w);
-    }
-    return { question: 'What number is this?', display: String(target), choices: shuffle([target, ...wrongs].map(String)), answer: String(target) };
+    // "What shape is this?"
+    const target = shapes[Math.floor(Math.random() * shapes.length)];
+    return { question: 'What shape is this?', display: target.display, choices: shuffle(shapes.map(s => s.name.charAt(0).toUpperCase() + s.name.slice(1))), answer: target.name.charAt(0).toUpperCase() + target.name.slice(1) };
   }
 }
 
-function generateGrade1Problem() {
+function generateGrade1Math() {
   const isAdd = Math.random() < 0.5;
   let a, b, answer;
   if (isAdd) {
@@ -2349,7 +2690,7 @@ function generateGrade1Problem() {
   }
 }
 
-function generateGrade2Problem() {
+function generateGrade2Math() {
   const isAdd = Math.random() < 0.5;
   let a, b, answer;
   if (isAdd) {
@@ -2363,6 +2704,88 @@ function generateGrade2Problem() {
     if (b > a) [a, b] = [b, a];
     answer = a - b;
     return { question: `${a} - ${b} = ?`, display: null, choices: genNumberChoices(answer, 4, Math.max(0, answer - 12), answer + 12), answer: String(answer) };
+  }
+}
+
+function generateTellingTime() {
+  const hour = Math.floor(Math.random() * 12) + 1;
+  const minuteOptions = [0, 15, 30, 45];
+  const minute = minuteOptions[Math.floor(Math.random() * minuteOptions.length)];
+  const timeStr = `${hour}:${minute.toString().padStart(2, '0')}`;
+  // Build clock HTML
+  const hourAngle = (hour % 12) * 30 + minute * 0.5;
+  const minuteAngle = minute * 6;
+  let ticks = '';
+  for (let i = 0; i < 12; i++) {
+    ticks += `<div class="clock-tick" style="transform:translateX(-50%) rotate(${i*30}deg)"></div>`;
+  }
+  const clockHtml = `<div class="clock-face">${ticks}<div class="clock-hand-hour" style="transform:rotate(${hourAngle}deg)"></div><div class="clock-hand-minute" style="transform:rotate(${minuteAngle}deg)"></div><div class="clock-center"></div></div>`;
+  // Generate wrong answers
+  const wrongs = new Set();
+  while (wrongs.size < 3) {
+    const wh = Math.floor(Math.random() * 12) + 1;
+    const wm = minuteOptions[Math.floor(Math.random() * minuteOptions.length)];
+    const ws = `${wh}:${wm.toString().padStart(2, '0')}`;
+    if (ws !== timeStr) wrongs.add(ws);
+  }
+  return { question: 'What time does the clock show?', display: clockHtml, isHtml: true, choices: shuffle([timeStr, ...wrongs]), answer: timeStr };
+}
+
+const SPELLING_GRADE1 = [
+  { word: 'cat', emoji: '🐱', wrongs: ['kat', 'cet', 'cta'] },
+  { word: 'dog', emoji: '🐶', wrongs: ['dag', 'doog', 'bog'] },
+  { word: 'sun', emoji: '☀️', wrongs: ['san', 'son', 'snu'] },
+  { word: 'red', emoji: '🔴', wrongs: ['rad', 'rid', 'erd'] },
+  { word: 'big', emoji: '🐘', wrongs: ['bag', 'beg', 'gib'] },
+  { word: 'run', emoji: '🏃', wrongs: ['ran', 'rin', 'rnu'] },
+  { word: 'hop', emoji: '🐰', wrongs: ['hap', 'hep', 'poh'] },
+  { word: 'hat', emoji: '🎩', wrongs: ['het', 'hut', 'tah'] },
+];
+
+const SPELLING_GRADE2 = [
+  { word: 'house', emoji: '🏠', wrongs: ['hous', 'howse', 'hoose'] },
+  { word: 'friend', emoji: '🤝', wrongs: ['frend', 'freind', 'frind'] },
+  { word: 'school', emoji: '🏫', wrongs: ['skool', 'scool', 'shool'] },
+  { word: 'people', emoji: '👨‍👩‍👧‍👦', wrongs: ['peple', 'peeple', 'peopel'] },
+  { word: 'water', emoji: '💧', wrongs: ['watter', 'woter', 'watar'] },
+  { word: 'happy', emoji: '😊', wrongs: ['hapy', 'hapey', 'heppy'] },
+  { word: 'because', emoji: '💡', wrongs: ['becuz', 'becuse', 'becaus'] },
+  { word: 'every', emoji: '✨', wrongs: ['evrey', 'evry', 'evrye'] },
+];
+
+function generateSpelling(grade) {
+  const words = grade <= 1 ? SPELLING_GRADE1 : SPELLING_GRADE2;
+  const w = words[Math.floor(Math.random() * words.length)];
+  const numWrongs = grade <= 1 ? 2 : 3;
+  const wrongs = shuffle(w.wrongs).slice(0, numWrongs);
+  return { question: `${w.emoji} How do you spell this?`, display: w.word.toUpperCase(), choices: shuffle([w.word, ...wrongs]), answer: w.word };
+}
+
+function generatePattern(grade) {
+  if (grade <= 1) {
+    // Simple counting patterns
+    const patterns = [
+      { seq: [2,4,6], answer: 8, label: '2, 4, 6, ?' },
+      { seq: [1,2,3], answer: 4, label: '1, 2, 3, ?' },
+      { seq: [5,10,15], answer: 20, label: '5, 10, 15, ?' },
+      { seq: [3,6,9], answer: 12, label: '3, 6, 9, ?' },
+      { seq: [1,3,5], answer: 7, label: '1, 3, 5, ?' },
+      { seq: [10,20,30], answer: 40, label: '10, 20, 30, ?' },
+    ];
+    const p = patterns[Math.floor(Math.random() * patterns.length)];
+    return { question: 'What comes next?', display: p.label, choices: genNumberChoices(p.answer, 3, Math.max(0, p.answer - 5), p.answer + 5), answer: String(p.answer) };
+  } else {
+    // Grade 2: harder patterns
+    const patterns = [
+      { seq: [5,10,15,20], answer: 25, label: '5, 10, 15, 20, ?' },
+      { seq: [3,6,9,12], answer: 15, label: '3, 6, 9, 12, ?' },
+      { seq: [4,8,12,16], answer: 20, label: '4, 8, 12, 16, ?' },
+      { seq: [7,14,21], answer: 28, label: '7, 14, 21, ?' },
+      { seq: [100,90,80], answer: 70, label: '100, 90, 80, ?' },
+      { seq: [50,45,40,35], answer: 30, label: '50, 45, 40, 35, ?' },
+    ];
+    const p = patterns[Math.floor(Math.random() * patterns.length)];
+    return { question: 'What comes next?', display: p.label, choices: genNumberChoices(p.answer, 4, Math.max(0, p.answer - 10), p.answer + 10), answer: String(p.answer) };
   }
 }
 
@@ -2382,10 +2805,23 @@ function genNumberChoices(correct, count, min, max) {
 function showMathProblem(callback) {
   mathCallback = callback;
   const grade = getPlayerGrade();
-  const problem = generateMathProblem(grade);
+  const problem = generateProblem(grade);
 
-  document.getElementById('mathDisplay').textContent = problem.display || '';
-  document.getElementById('mathDisplay').style.display = problem.display ? '' : 'none';
+  const displayEl = document.getElementById('mathDisplay');
+  if (problem.isHtml) {
+    displayEl.innerHTML = problem.display;
+    displayEl.style.display = '';
+    displayEl.style.fontSize = '';
+  } else if (problem.display) {
+    displayEl.innerHTML = '';
+    displayEl.textContent = problem.display;
+    displayEl.style.display = '';
+    displayEl.style.fontSize = problem.display.length > 6 ? '2rem' : '';
+  } else {
+    displayEl.innerHTML = '';
+    displayEl.textContent = '';
+    displayEl.style.display = 'none';
+  }
   document.getElementById('mathQuestion').textContent = problem.question;
   document.getElementById('mathScore').textContent = `Score: ${state.mathCorrect}/${state.mathTotal}`;
 
@@ -2402,20 +2838,58 @@ function showMathProblem(callback) {
   document.getElementById('mathOverlay').classList.add('active');
 }
 
+const CELEB_PHRASES = [
+  "You're on FIRE! 🔥", "Brain power ACTIVATED! 🧠⚡", "GENIUS alert! 🚨",
+  "Too smart for this game! 😎", "Math wizard! 🧙", "Nailed it! 💅",
+  "Big brain energy! 🧠✨", "You crushed it! 💪", "Einstein WHO?! 🤓",
+  "Smarty pants! 👖🧠", "Ka-BOOM! 💥", "That was TOO easy! 😏",
+  "Your brain is showing off! 🌟", "Unstoppable! 🦸", "Legendary! 🏆",
+];
+const CELEB_EMOJIS = ['🎉','🥳','🌟','💫','🏆','🎊','✨','🚀','💪','🧠'];
+
+function showCelebration(callback) {
+  const overlay = document.getElementById('mathCelebration');
+  document.getElementById('celebEmoji').textContent = CELEB_EMOJIS[Math.floor(Math.random() * CELEB_EMOJIS.length)];
+  document.getElementById('celebPhrase').textContent = CELEB_PHRASES[Math.floor(Math.random() * CELEB_PHRASES.length)];
+  // Sparkle particles
+  const card = overlay.querySelector('.celebration-card');
+  for (let i = 0; i < 12; i++) {
+    const sp = document.createElement('div');
+    sp.className = 'celeb-sparkle';
+    sp.style.left = '50%';
+    sp.style.top = '40%';
+    sp.style.setProperty('--sx', (Math.random() * 200 - 100) + 'px');
+    sp.style.setProperty('--sy', (Math.random() * 200 - 100) + 'px');
+    sp.style.background = ['#FBBF24','#EF4444','#4ADE80','#60A5FA','#C084FC','#FB923C'][i % 6];
+    card.appendChild(sp);
+  }
+  overlay.classList.add('active');
+  setTimeout(() => {
+    overlay.classList.remove('active');
+    card.querySelectorAll('.celeb-sparkle').forEach(s => s.remove());
+    if (callback) callback();
+  }, 1800);
+}
+
 function checkMathAnswer(btn, selected, problem) {
   state.mathTotal++;
   if (String(selected) === String(problem.answer)) {
     state.mathCorrect++;
+    state.mathStreak = (state.mathStreak || 0) + 1;
+    if (state.mathStreak > (state.bestMathStreak || 0)) state.bestMathStreak = state.mathStreak;
+    state.mathBonus = true;
     btn.classList.add('correct');
     saveState();
     document.getElementById('mathScore').textContent = `Score: ${state.mathCorrect}/${state.mathTotal}`;
-    // Disable all buttons
     document.querySelectorAll('.math-choice-btn').forEach(b => b.disabled = true);
     setTimeout(() => {
       document.getElementById('mathOverlay').classList.remove('active');
-      if (mathCallback) { mathCallback(); mathCallback = null; }
+      showCelebration(() => {
+        if (mathCallback) { mathCallback(); mathCallback = null; }
+      });
     }, 600);
   } else {
+    state.mathStreak = 0;
     btn.classList.add('wrong');
     saveState();
     document.getElementById('mathScore').textContent = `Score: ${state.mathCorrect}/${state.mathTotal}`;
@@ -2496,14 +2970,18 @@ function completeCard() {
   document.getElementById('mysteryFront').querySelector('.mystery-question').textContent = '❓';
   if (pendingReveal && pendingReveal.type === 'challenge') {
     showDoneBurst();
+    // Apply math bonus: +1 extra if they solved correctly
+    if (state.mathBonus) {
+      state.challenges++;
+      state.mathBonus = false;
+      updateStats();
+    }
   }
   pendingReveal = null;
-  // Post-math to unlock next Go
-  turnState = 'POST_MATH';
-  showMathProblem(() => {
-    turnState = 'IDLE';
-    setGoEnabled(true);
-  });
+  saveState();
+  checkBadges();
+  turnState = 'IDLE';
+  setGoEnabled(true);
 }
 
 function closeModal() { completeCard(); }
@@ -2514,6 +2992,47 @@ function showDoneBurst() {
   burst.innerHTML = '<div class="big-check">✅</div>';
   document.body.appendChild(burst);
   setTimeout(() => burst.remove(), 900);
+}
+
+// ===== ACHIEVEMENT BADGES =====
+const BADGES = [
+  { id: 'first_step', name: 'First Step', emoji: '👶', desc: 'Complete your first activity', check: s => s.challenges >= 1 },
+  { id: 'brainy', name: 'Brainy', emoji: '🧮', desc: 'Answer 10 problems correctly', check: s => s.mathCorrect >= 10 },
+  { id: 'math_master', name: 'Math Master', emoji: '🧠', desc: 'Answer 50 problems correctly', check: s => s.mathCorrect >= 50 },
+  { id: 'on_fire', name: 'On Fire', emoji: '🔥', desc: 'Get a 3-activity streak', check: s => (s.bestStreak || 0) >= 3 },
+  { id: 'unstoppable', name: 'Unstoppable', emoji: '⚡', desc: 'Get a 10-activity streak', check: s => (s.bestStreak || 0) >= 10 },
+  { id: 'explorer', name: 'Explorer', emoji: '🗺️', desc: 'Reach the Crystal Lake', check: s => s.position >= 21 },
+  { id: 'halfway', name: 'Halfway There', emoji: '🎯', desc: 'Reach space 50', check: s => s.position >= 50 },
+  { id: 'mountaineer', name: 'Mountaineer', emoji: '⛰️', desc: 'Reach Starlight Mountain', check: s => s.position >= 61 },
+  { id: 'champion', name: 'Champion', emoji: '🏆', desc: 'Complete the entire adventure!', check: s => s.position >= 100 },
+  { id: 'star_collector', name: 'Star Collector', emoji: '⭐', desc: 'Earn 3 star prizes', check: s => s.stars >= 3 },
+  { id: 'bookworm', name: 'Bookworm', emoji: '📚', desc: 'Complete 20 activities', check: s => s.challenges >= 20 },
+  { id: 'perfectionist', name: 'Perfectionist', emoji: '💯', desc: '10 correct answers in a row!', check: s => (s.bestMathStreak || 0) >= 10 },
+];
+
+function checkBadges() {
+  if (!state.badges) state.badges = [];
+  const newBadges = [];
+  BADGES.forEach(badge => {
+    if (!state.badges.includes(badge.id) && badge.check(state)) {
+      state.badges.push(badge.id);
+      newBadges.push(badge);
+    }
+  });
+  saveState();
+  if (newBadges.length > 0) {
+    showBadgePopup(newBadges[0]);
+  }
+}
+
+function showBadgePopup(badge) {
+  document.getElementById('badgeEmoji').textContent = badge.emoji;
+  document.getElementById('badgeName').textContent = badge.name;
+  document.getElementById('badgeDesc').textContent = badge.desc;
+  document.getElementById('badgePopup').classList.add('active');
+  setTimeout(() => {
+    document.getElementById('badgePopup').classList.remove('active');
+  }, 2500);
 }
 
 // Zone entry banner
