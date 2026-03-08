@@ -1,0 +1,1704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ryleigh Land">
+<meta name="theme-color" content="#87CEEB">
+<title>Ryleigh Land</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: #87CEEB;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  color: white;
+}
+
+/* ===== STICKY HEADER ===== */
+.top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+.top-bar-inner {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.game-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.5rem;
+  text-align: center;
+  background: linear-gradient(135deg, #2D5016, #4ADE80, #22D3EE);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 1px;
+  text-shadow: none;
+}
+
+.stats-row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.stat-pill {
+  background: rgba(0,0,0,0.06);
+  border-radius: 20px;
+  padding: 3px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ===== PATH VIEWPORT ===== */
+.path-viewport {
+  position: relative;
+  padding-top: 90px;
+  padding-bottom: 140px;
+  min-height: 100vh;
+}
+
+/* ===== ZONE SCENES (full-width backgrounds) ===== */
+.zone-scene {
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.zone-scene-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Zone label */
+.zone-name {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Fredoka One', cursive;
+  font-size: 1rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  opacity: 0.2;
+  white-space: nowrap;
+  top: 60px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* ===== CSS ART: TREES ===== */
+.tree {
+  position: absolute;
+  bottom: 0;
+}
+
+/* Pine tree */
+.pine { display: flex; flex-direction: column; align-items: center; }
+.pine-top {
+  width: 0; height: 0;
+  border-left: solid transparent;
+  border-right: solid transparent;
+  border-bottom: solid;
+}
+.pine-trunk {
+  background: #8B6914;
+  border-radius: 2px;
+}
+
+/* Leafy tree */
+.leafy { display: flex; flex-direction: column; align-items: center; }
+.leafy-crown { border-radius: 50%; }
+.leafy-trunk {
+  background: #A0522D;
+  border-radius: 3px;
+}
+
+/* Mushroom */
+.mushroom { display: flex; flex-direction: column; align-items: center; }
+.mushroom-cap {
+  border-radius: 50% 50% 4px 4px;
+}
+.mushroom-stem {
+  background: #FFF8DC;
+  border-radius: 2px;
+}
+
+/* Flower */
+.flower {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.flower-head { border-radius: 50%; }
+.flower-stem { background: #228B22; width: 2px; }
+
+/* Mountain */
+.mountain {
+  position: absolute;
+  bottom: 0;
+  width: 0; height: 0;
+  border-left: solid transparent;
+  border-right: solid transparent;
+  border-bottom: solid;
+}
+
+/* Cloud */
+.cloud {
+  position: absolute;
+  background: rgba(255,255,255,0.6);
+  border-radius: 50px;
+  animation: cloudDrift linear infinite;
+}
+
+@keyframes cloudDrift {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(60px); }
+}
+
+/* Castle tower */
+.castle-tower {
+  position: absolute;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tower-body { border-radius: 4px 4px 0 0; }
+.tower-roof {
+  width: 0; height: 0;
+  border-left: solid transparent;
+  border-right: solid transparent;
+  border-bottom: solid;
+}
+.tower-flag {
+  position: absolute;
+  top: -8px;
+  width: 12px;
+  height: 8px;
+  border-radius: 0 4px 4px 0;
+}
+
+/* ===== PARTICLES ===== */
+.particle {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+}
+
+/* Firefly */
+.firefly {
+  background: #FBBF24;
+  box-shadow: 0 0 6px 3px rgba(251,191,36,0.5);
+  animation: fireflyFloat ease-in-out infinite;
+}
+
+@keyframes fireflyFloat {
+  0%, 100% { transform: translate(0, 0); opacity: 0.3; }
+  25% { transform: translate(15px, -20px); opacity: 1; }
+  50% { transform: translate(-10px, -35px); opacity: 0.6; }
+  75% { transform: translate(20px, -15px); opacity: 1; }
+}
+
+/* Star twinkle */
+.twinkle-star {
+  background: white;
+  box-shadow: 0 0 4px 2px rgba(255,255,255,0.6);
+  animation: twinkle ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+/* Water sparkle */
+.water-sparkle {
+  background: white;
+  box-shadow: 0 0 3px 1px rgba(96,165,250,0.5);
+  animation: sparkle ease-in-out infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0.1; transform: scale(0.5); }
+  50% { opacity: 0.8; transform: scale(1.2); }
+}
+
+/* Butterfly */
+.butterfly {
+  font-size: 14px;
+  animation: butterflyDrift ease-in-out infinite;
+}
+
+@keyframes butterflyDrift {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(25px, -30px) rotate(10deg); }
+  50% { transform: translate(5px, -50px) rotate(-5deg); }
+  75% { transform: translate(-15px, -25px) rotate(8deg); }
+}
+
+/* Golden sparkle */
+.gold-sparkle {
+  background: #FBBF24;
+  box-shadow: 0 0 5px 2px rgba(251,191,36,0.5);
+  animation: goldFloat ease-in-out infinite;
+}
+
+@keyframes goldFloat {
+  0%, 100% { opacity: 0.3; transform: translateY(0) scale(0.8); }
+  50% { opacity: 1; transform: translateY(-20px) scale(1.4); }
+}
+
+/* ===== PATH CONTAINER ===== */
+.path-container {
+  position: relative;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 30px 20px 40px;
+  z-index: 5;
+}
+
+.path-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ===== NODE STYLES ===== */
+.node {
+  position: absolute;
+  z-index: 3;
+  transform: translate(-50%, -50%);
+  transition: transform 0.3s ease;
+}
+
+.node-circle {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  font-weight: 800;
+  cursor: default;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.node.completed .node-circle {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25), inset 0 -2px 4px rgba(0,0,0,0.15);
+}
+
+.node.completed .node-circle::after {
+  content: '✓';
+  font-size: 1.4rem;
+  color: white;
+  font-weight: 900;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.node.locked .node-circle {
+  background: rgba(255,255,255,0.25) !important;
+  border: 3px solid rgba(255,255,255,0.35) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.node.locked .node-circle::after {
+  content: '🔒';
+  font-size: 0.9rem;
+  opacity: 0.5;
+}
+
+.node.current .node-circle {
+  box-shadow: 0 0 0 5px rgba(255,255,255,0.4), 0 6px 25px rgba(0,0,0,0.3);
+  animation: currentPulse 2s ease-in-out infinite;
+}
+
+@keyframes currentPulse {
+  0%, 100% { box-shadow: 0 0 0 5px rgba(255,255,255,0.4), 0 6px 25px rgba(0,0,0,0.3); }
+  50% { box-shadow: 0 0 0 12px rgba(255,255,255,0.15), 0 6px 30px rgba(0,0,0,0.2); }
+}
+
+.node.current .node-circle::after { content: ''; }
+
+.node.star .node-circle {
+  width: 68px;
+  height: 68px;
+  background: linear-gradient(135deg, #FBBF24, #F59E0B) !important;
+  border: 3px solid #FDE68A !important;
+  box-shadow: 0 4px 20px rgba(251,191,36,0.5), 0 0 0 4px rgba(251,191,36,0.2);
+}
+
+.node.star.locked .node-circle {
+  background: rgba(251,191,36,0.2) !important;
+  border: 3px solid rgba(251,191,36,0.35) !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.node.star .node-circle::after,
+.node.star.completed .node-circle::after {
+  content: '⭐';
+  font-size: 1.5rem;
+}
+
+.node.next .node-circle {
+  animation: nextGlow 1.5s ease-in-out infinite;
+}
+
+.node.next .node-circle::after {
+  content: '?';
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.4rem;
+  color: white;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+@keyframes nextGlow {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(255,255,255,0.3), 0 4px 15px rgba(0,0,0,0.2); }
+  50% { box-shadow: 0 0 0 10px rgba(255,255,255,0.15), 0 4px 20px rgba(0,0,0,0.15); }
+}
+
+.node-num {
+  position: absolute;
+  bottom: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.6rem;
+  font-weight: 700;
+  opacity: 0.4;
+  white-space: nowrap;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+/* ===== CHARACTER ===== */
+.character-wrapper {
+  position: absolute;
+  z-index: 10;
+  transform: translate(-50%, -50%);
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+}
+
+.character-img {
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  border: 4px solid white;
+  box-shadow: 0 6px 25px rgba(0,0,0,0.3), 0 0 0 6px rgba(255,255,255,0.2);
+  object-fit: cover;
+  object-position: center 15%;
+  background: linear-gradient(135deg, #FF6B9D, #C084FC);
+  animation: charBob 3s ease-in-out infinite;
+}
+
+@keyframes charBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.character-fallback {
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  border: 4px solid white;
+  box-shadow: 0 6px 25px rgba(0,0,0,0.3), 0 0 0 6px rgba(255,255,255,0.2);
+  background: linear-gradient(135deg, #6B7280, #9CA3AF);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  animation: charBob 3s ease-in-out infinite;
+}
+
+/* ===== BOTTOM BAR ===== */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 10px 20px;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid rgba(0,0,0,0.06);
+  text-align: center;
+}
+
+.bottom-bar-inner {
+  max-width: 500px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: center;
+}
+
+.reset-icon-btn {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+  padding: 8px;
+}
+.reset-icon-btn:hover, .reset-icon-btn:active {
+  opacity: 1;
+}
+
+.spin-btn {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.25rem;
+  padding: 14px 48px;
+  border: none;
+  border-radius: 50px;
+  background: linear-gradient(135deg, #4ADE80, #22C55E);
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(74,222,128,0.4);
+  transition: all 0.3s ease;
+  touch-action: manipulation;
+  min-height: 52px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.spin-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(74,222,128,0.5); }
+.spin-btn:active { transform: scale(0.96); }
+.spin-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+.spin-result {
+  font-family: 'Fredoka One', cursive;
+  font-size: 2rem;
+  color: #22C55E;
+  min-width: 50px;
+}
+
+@keyframes popIn {
+  0% { transform: scale(0); opacity: 0; }
+  70% { transform: scale(1.3); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.modal-overlay.active { display: flex; }
+
+.modal-card {
+  background: white;
+  border-radius: 28px;
+  padding: 36px 30px;
+  max-width: 380px;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  animation: cardSlideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+
+@keyframes cardSlideUp {
+  0% { transform: translateY(60px) scale(0.9); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.modal-card.challenge { border: 3px solid #C084FC; }
+.modal-card.prize { border: 3px solid #FBBF24; }
+
+.modal-emoji { font-size: 3.5rem; margin-bottom: 8px; }
+
+.modal-label {
+  font-family: 'Fredoka One', cursive;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin-bottom: 8px;
+}
+
+.modal-card.challenge .modal-label { color: #A855F7; }
+.modal-card.prize .modal-label { color: #F59E0B; }
+
+.modal-text {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1F2937;
+  line-height: 1.5;
+  margin-bottom: 22px;
+}
+
+.modal-btn {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.05rem;
+  padding: 12px 36px;
+  border: none;
+  border-radius: 50px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s;
+  touch-action: manipulation;
+  min-height: 48px;
+}
+
+.modal-card.challenge .modal-btn { background: linear-gradient(135deg, #A855F7, #7C3AED); }
+.modal-card.prize .modal-btn { background: linear-gradient(135deg, #F59E0B, #D97706); }
+.modal-btn:hover { transform: scale(1.06); }
+
+.modal-confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: 28px;
+}
+
+/* Mystery card tap-to-reveal */
+.mystery-front {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.mystery-question {
+  font-size: 5rem;
+  animation: mysteryWobble 1.2s ease-in-out infinite;
+  display: inline-block;
+  user-select: none;
+}
+@keyframes mysteryWobble {
+  0%, 100% { transform: rotate(-5deg) scale(1); }
+  25% { transform: rotate(5deg) scale(1.08); }
+  50% { transform: rotate(-3deg) scale(1.04); }
+  75% { transform: rotate(4deg) scale(1.06); }
+}
+.mystery-tap-hint {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1rem;
+  color: #9CA3AF;
+  margin-top: 12px;
+  animation: tapPulse 1.5s ease-in-out infinite;
+}
+@keyframes tapPulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+.modal-revealed { display: none; }
+.modal-revealed.show {
+  display: block;
+  animation: revealFlip 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes revealFlip {
+  0% { transform: rotateY(90deg) scale(0.8); opacity: 0; }
+  100% { transform: rotateY(0) scale(1); opacity: 1; }
+}
+
+/* Streak badge */
+.streak-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, #FF6B35, #FF3D00);
+  color: white;
+  font-family: 'Fredoka One', cursive;
+  font-size: 0.75rem;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-top: 10px;
+  animation: popIn 0.4s ease;
+}
+
+/* Zone banner */
+.zone-banner {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  z-index: 500;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.5rem;
+  color: white;
+  padding: 16px 32px;
+  border-radius: 20px;
+  text-align: center;
+  pointer-events: none;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+.zone-banner.show {
+  animation: zoneBannerIn 2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+@keyframes zoneBannerIn {
+  0% { transform: translate(-50%, -50%) scale(0) rotate(-10deg); opacity: 0; }
+  15% { transform: translate(-50%, -50%) scale(1.1) rotate(2deg); opacity: 1; }
+  30% { transform: translate(-50%, -50%) scale(1) rotate(0); opacity: 1; }
+  80% { transform: translate(-50%, -50%) scale(1) rotate(0); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+}
+
+/* Challenge done celebration */
+.done-burst {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.done-burst .big-check {
+  font-size: 6rem;
+  animation: checkBurst 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+@keyframes checkBurst {
+  0% { transform: scale(0) rotate(-20deg); opacity: 0; }
+  50% { transform: scale(1.3) rotate(5deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0); opacity: 0; }
+}
+
+/* ===== LOG ===== */
+.log-toggle {
+  position: fixed;
+  bottom: 76px;
+  right: 14px;
+  z-index: 99;
+  background: rgba(255,255,255,0.7);
+  border: 2px solid rgba(0,0,0,0.08);
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+  touch-action: manipulation;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.log-panel {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 60px 20px 20px;
+  overflow-y: auto;
+}
+
+.log-panel.active { display: block; }
+
+.log-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.log-panel-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.4rem;
+  color: #4ADE80;
+}
+
+.log-close {
+  background: rgba(0,0,0,0.06);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  color: #374151;
+  font-size: 1.2rem;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.log-list { max-width: 500px; margin: 0 auto; }
+
+.log-entry {
+  background: rgba(0,0,0,0.04);
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.log-entry-num {
+  background: linear-gradient(135deg, #4ADE80, #22C55E);
+  color: white;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.log-entry.prize .log-entry-num {
+  background: linear-gradient(135deg, #FBBF24, #F59E0B);
+}
+
+/* ===== RESET ===== */
+.reset-link {
+  text-align: center;
+  padding: 30px 20px 10px;
+  position: relative;
+  z-index: 6;
+}
+
+.reset-btn {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 6px 20px;
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 50px;
+  background: rgba(255,255,255,0.5);
+  color: rgba(0,0,0,0.35);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.reset-btn:hover { border-color: #EF4444; color: #EF4444; }
+
+/* ===== INSTALL BANNER ===== */
+.install-banner {
+  display: none;
+  background: rgba(0,0,0,0.05);
+  border-radius: 12px;
+  padding: 8px 14px;
+  margin: 6px 16px 0;
+  max-width: 468px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(0,0,0,0.45);
+}
+
+.install-banner.show { display: block; }
+
+.install-banner .close-banner {
+  background: none;
+  border: none;
+  color: rgba(0,0,0,0.25);
+  font-size: 0.9rem;
+  cursor: pointer;
+  float: right;
+  touch-action: manipulation;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (min-width: 601px) and (max-width: 1024px) {
+  .game-title { font-size: 1.8rem; }
+  .node-circle { width: 66px; height: 66px; }
+  .node.star .node-circle { width: 76px; height: 76px; }
+  .character-img, .character-fallback { width: 88px; height: 88px; }
+  .spin-btn { font-size: 1.4rem; padding: 16px 58px; }
+  .modal-card { max-width: 440px; padding: 42px 36px; }
+}
+
+@supports (padding: env(safe-area-inset-top)) {
+  .top-bar { padding-top: calc(10px + env(safe-area-inset-top)); }
+}
+</style>
+</head>
+<body>
+
+<!-- STICKY TOP BAR -->
+<div class="top-bar">
+  <div class="top-bar-inner">
+    <div class="game-title">🐺 Ryleigh Land 🌲</div>
+    <div class="stats-row">
+      <div class="stat-pill">📍 <span id="posDisplay">0</span>/100</div>
+      <div class="stat-pill">✅ <span id="challengeCount">0</span></div>
+      <div class="stat-pill">⭐ <span id="starCount">0</span></div>
+      <div class="stat-pill">🎁 <span id="prizeCount">0</span></div>
+    </div>
+  </div>
+  <div class="install-banner" id="installBanner">
+    <button class="close-banner" onclick="dismissBanner()">✕</button>
+    Tap Share ⬆️ then "Add to Home Screen" for app mode!
+  </div>
+</div>
+
+<!-- SCROLLABLE PATH -->
+<div class="path-viewport" id="pathViewport">
+  <!-- Zone scenes are injected here -->
+  <div class="path-container" id="pathContainer">
+    <svg class="path-svg" id="pathSvg"></svg>
+  </div>
+
+  <div class="reset-link">
+    <button class="reset-btn" onclick="resetGame()">🔄 Start New Adventure</button>
+  </div>
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <div class="bottom-bar-inner">
+    <button class="reset-icon-btn" onclick="confirmReset()" title="Reset Game">🔄</button>
+    <div class="spin-result" id="spinResult"></div>
+    <button class="spin-btn" id="spinBtn" onclick="spin()">🎲 Spin!</button>
+  </div>
+</div>
+
+<button class="log-toggle" onclick="toggleLog()">📜</button>
+
+<!-- LOG PANEL -->
+<div class="log-panel" id="logPanel">
+  <div class="log-panel-header">
+    <div class="log-panel-title">📜 Adventure Log</div>
+    <button class="log-close" onclick="toggleLog()">✕</button>
+  </div>
+  <div class="log-list" id="logList"></div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-card" id="modalCard">
+    <div class="modal-confetti" id="confettiBox"></div>
+    <div class="mystery-front" id="mysteryFront" onclick="revealCard()">
+      <div class="mystery-question">❓</div>
+      <div class="mystery-tap-hint">Tap to reveal!</div>
+    </div>
+    <div class="modal-revealed" id="modalRevealed">
+      <div class="modal-emoji" id="modalEmoji"></div>
+      <div class="modal-label" id="modalLabel"></div>
+      <div class="modal-text" id="modalText"></div>
+      <div id="streakBadge"></div>
+      <button class="modal-btn" id="modalBtn" onclick="completeCard()">Got It!</button>
+    </div>
+  </div>
+</div>
+<div id="zoneBanner" class="zone-banner"></div>
+
+<script>
+// ===== GAME DATA =====
+const CHALLENGES = [
+  { text: "Practice piano for 15 minutes 🎹", emoji: "🎹", short: "Piano Practice" },
+  { text: "Read a book for 20 minutes 📖", emoji: "📖", short: "Reading Time" },
+  { text: "Practice math problems for 15 minutes 🔢", emoji: "🔢", short: "Math Practice" },
+  { text: "Play softball with Mom or Dad ⚾", emoji: "⚾", short: "Softball" },
+  { text: "Play the playground game system for exercise! 🏃‍♀️", emoji: "🏃‍♀️", short: "Playground Games" },
+  { text: "Ride bikes or practice roller skating 🛼", emoji: "🛼", short: "Bikes / Skating" },
+  { text: "Help cook or bake something yummy with a parent 👩‍🍳", emoji: "👩‍🍳", short: "Cooking Adventure" },
+  { text: "Create an art project — draw, paint, or craft! 🎨", emoji: "🎨", short: "Art Project" },
+  { text: "Write a kind letter or draw a picture for someone you love 💌", emoji: "💌", short: "Kindness Letter" },
+];
+
+const PRIZES = [
+  { text: "A new Tonie — Stitch! 💙🧵", emoji: "🧵" },
+  { text: "A trip to Five Below — pick any toy! 🛍️", emoji: "🛍️" },
+  { text: "A sleepover with a friend! 🛏️✨", emoji: "🛏️" },
+  { text: "A fun playdate! 🎈", emoji: "🎈" },
+  { text: "A special dessert of your choice! 🍰", emoji: "🍰" },
+  { text: "Movie night — YOU pick the movie + popcorn! 🍿🎬", emoji: "🎬" },
+  { text: "Stay up 30 minutes past bedtime! 🌙", emoji: "🌙" },
+  { text: "Pick dinner for the whole family! 🍕", emoji: "🍕" },
+  { text: "A trip to get ice cream! 🍦", emoji: "🍦" },
+  { text: "Pick a brand new book! 📚", emoji: "📚" },
+  { text: "Breakfast in bed! 🥞👑", emoji: "👑" },
+];
+
+const TOTAL_SPACES = 100;
+const STAR_INTERVAL = 20;
+const Y_SPACING = 90;
+const START_Y = 50;
+
+// Zone configs
+const ZONES = [
+  {
+    name: 'Enchanted Forest',
+    gradient: 'linear-gradient(180deg, #87CEEB 0%, #90EE90 15%, #228B22 40%, #1A5C1A 70%, #2D5016 100%)',
+    nodeColors: ['#FF6B9D','#F472B6','#EC4899','#DB2777','#BE185D'],
+    labelColor: '#2D5016',
+  },
+  {
+    name: 'Crystal Lake',
+    gradient: 'linear-gradient(180deg, #2D5016 0%, #87CEEB 15%, #60A5FA 35%, #2563EB 55%, #1D4ED8 75%, #1E3A5F 100%)',
+    nodeColors: ['#60A5FA','#38BDF8','#22D3EE','#2DD4BF','#06B6D4'],
+    labelColor: '#BFDBFE',
+  },
+  {
+    name: 'Enchanted Garden',
+    gradient: 'linear-gradient(180deg, #1E3A5F 0%, #FDF2F8 12%, #FBCFE8 30%, #F9A8D4 50%, #F472B6 70%, #EC4899 85%, #7C2D5A 100%)',
+    nodeColors: ['#4ADE80','#34D399','#2DD4BF','#10B981','#059669'],
+    labelColor: '#831843',
+  },
+  {
+    name: 'Starlight Mountain',
+    gradient: 'linear-gradient(180deg, #7C2D5A 0%, #312E81 15%, #1E1B4B 35%, #0F0E2A 55%, #1a1a2e 70%, #0F0E2A 100%)',
+    nodeColors: ['#C084FC','#A855F7','#8B5CF6','#7C3AED','#6D28D9'],
+    labelColor: '#C4B5FD',
+  },
+  {
+    name: 'Victory Castle',
+    gradient: 'linear-gradient(180deg, #0F0E2A 0%, #451A03 10%, #92400E 25%, #D97706 45%, #FBBF24 65%, #FEF3C7 85%, #FFFBEB 100%)',
+    nodeColors: ['#FBBF24','#F59E0B','#FB923C','#F97316','#EF4444'],
+    labelColor: '#92400E',
+  },
+];
+
+// ===== STATE =====
+let state = loadState();
+
+function defaultState() {
+  return { position: 0, challenges: 0, stars: 0, prizes: 0, log: [], prizeIndex: 0, streak: 0, lastZone: -1 };
+}
+
+function loadState() {
+  try {
+    const s = JSON.parse(localStorage.getItem('ryleighLand'));
+    if (!s) return defaultState();
+    if (s.streak === undefined) s.streak = 0;
+    if (s.lastZone === undefined) s.lastZone = -1;
+    return s;
+  } catch { return defaultState(); }
+}
+
+function saveState() {
+  localStorage.setItem('ryleighLand', JSON.stringify(state));
+}
+
+// ===== NODE POSITIONS =====
+function getNodePositions() {
+  const positions = [];
+  const containerWidth = 380;
+  const centerX = containerWidth / 2;
+  const amplitude = 110;
+
+  for (let i = 0; i < TOTAL_SPACES; i++) {
+    const progress = i / 4;
+    const x = centerX + Math.sin(progress * Math.PI) * amplitude;
+    const y = START_Y + i * Y_SPACING;
+    positions.push({ x, y });
+  }
+  return positions;
+}
+
+const NODE_POSITIONS = getNodePositions();
+
+// ===== SCENERY GENERATION =====
+let sceneryBuilt = false;
+
+function buildScenery() {
+  if (sceneryBuilt) return;
+  sceneryBuilt = true;
+
+  const viewport = document.getElementById('pathViewport');
+  // Remove any old scenes
+  viewport.querySelectorAll('.zone-scene').forEach(el => el.remove());
+
+  const zoneHeight = 20 * Y_SPACING;
+  const pathTopPad = 90 + 30; // viewport padding-top + container padding
+
+  ZONES.forEach((zone, zi) => {
+    const scene = document.createElement('div');
+    scene.className = `zone-scene`;
+    const top = pathTopPad + zi * zoneHeight - 50;
+    scene.style.top = top + 'px';
+    scene.style.height = (zoneHeight + 100) + 'px';
+    scene.style.background = zone.gradient;
+
+    const inner = document.createElement('div');
+    inner.className = 'zone-scene-inner';
+
+    // Zone name label
+    const label = document.createElement('div');
+    label.className = 'zone-name';
+    label.style.color = zone.labelColor;
+    label.textContent = zone.name;
+    inner.appendChild(label);
+
+    // Add zone-specific scenery
+    if (zi === 0) buildForestScenery(inner, zoneHeight);
+    if (zi === 1) buildLakeScenery(inner, zoneHeight);
+    if (zi === 2) buildGardenScenery(inner, zoneHeight);
+    if (zi === 3) buildMountainScenery(inner, zoneHeight);
+    if (zi === 4) buildCastleScenery(inner, zoneHeight);
+
+    scene.appendChild(inner);
+    viewport.insertBefore(scene, viewport.firstChild);
+  });
+}
+
+// --- Zone 1: Enchanted Forest ---
+function buildForestScenery(container, h) {
+  // Pine trees on sides
+  const pineConfigs = [
+    { left: '2%', bottom: '10%', scale: 1.2 },
+    { left: '5%', bottom: '30%', scale: 0.9 },
+    { right: '3%', bottom: '20%', scale: 1.1 },
+    { right: '6%', bottom: '50%', scale: 0.8 },
+    { left: '3%', bottom: '55%', scale: 1.0 },
+    { right: '4%', bottom: '75%', scale: 1.3 },
+    { left: '6%', bottom: '80%', scale: 0.7 },
+    { right: '7%', bottom: '40%', scale: 1.0 },
+  ];
+
+  pineConfigs.forEach(cfg => {
+    const tree = document.createElement('div');
+    tree.className = 'pine tree';
+    Object.keys(cfg).forEach(k => { if (k !== 'scale') tree.style[k] = cfg[k]; });
+    const s = cfg.scale;
+
+    tree.innerHTML = `
+      <div class="pine-top" style="border-left:${14*s}px solid transparent;border-right:${14*s}px solid transparent;border-bottom:${22*s}px solid #1B5E20;margin-bottom:-4px"></div>
+      <div class="pine-top" style="border-left:${18*s}px solid transparent;border-right:${18*s}px solid transparent;border-bottom:${26*s}px solid #2E7D32;margin-bottom:-4px"></div>
+      <div class="pine-top" style="border-left:${22*s}px solid transparent;border-right:${22*s}px solid transparent;border-bottom:${30*s}px solid #388E3C"></div>
+      <div class="pine-trunk" style="width:${8*s}px;height:${14*s}px"></div>
+    `;
+    container.appendChild(tree);
+  });
+
+  // Mushrooms
+  for (let i = 0; i < 6; i++) {
+    const m = document.createElement('div');
+    m.className = 'mushroom';
+    m.style.position = 'absolute';
+    m.style[i % 2 === 0 ? 'left' : 'right'] = (8 + Math.random() * 12) + '%';
+    m.style.bottom = (10 + i * 15) + '%';
+    const colors = ['#EF4444', '#F59E0B', '#EC4899'];
+    const c = colors[i % 3];
+    m.innerHTML = `
+      <div class="mushroom-cap" style="width:16px;height:10px;background:${c}"></div>
+      <div class="mushroom-stem" style="width:6px;height:8px"></div>
+    `;
+    container.appendChild(m);
+  }
+
+  // Fireflies
+  for (let i = 0; i < 10; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle firefly';
+    p.style.width = (3 + Math.random() * 3) + 'px';
+    p.style.height = p.style.width;
+    p.style.left = (10 + Math.random() * 80) + '%';
+    p.style.top = (10 + Math.random() * 80) + '%';
+    p.style.animationDuration = (4 + Math.random() * 4) + 's';
+    p.style.animationDelay = (Math.random() * 3) + 's';
+    container.appendChild(p);
+  }
+}
+
+// --- Zone 2: Crystal Lake ---
+function buildLakeScenery(container, h) {
+  // Cattails/reeds
+  for (let i = 0; i < 8; i++) {
+    const reed = document.createElement('div');
+    reed.style.position = 'absolute';
+    reed.style[i % 2 === 0 ? 'left' : 'right'] = (3 + Math.random() * 10) + '%';
+    reed.style.bottom = (15 + i * 10) + '%';
+    const rh = 40 + Math.random() * 30;
+    reed.innerHTML = `
+      <div style="width:3px;height:${rh}px;background:#5B8C5A;border-radius:2px;margin:0 auto"></div>
+      <div style="width:8px;height:12px;background:#8B6914;border-radius:50%;margin:-2px auto 0;"></div>
+    `;
+    container.appendChild(reed);
+  }
+
+  // Clouds
+  for (let i = 0; i < 4; i++) {
+    const cloud = document.createElement('div');
+    cloud.className = 'cloud';
+    cloud.style.width = (60 + Math.random() * 50) + 'px';
+    cloud.style.height = (18 + Math.random() * 12) + 'px';
+    cloud.style.top = (3 + i * 6) + '%';
+    cloud.style.left = (5 + Math.random() * 70) + '%';
+    cloud.style.animationDuration = (20 + Math.random() * 20) + 's';
+    cloud.style.animationDelay = (Math.random() * 10) + 's';
+    container.appendChild(cloud);
+  }
+
+  // Water sparkles
+  for (let i = 0; i < 12; i++) {
+    const sp = document.createElement('div');
+    sp.className = 'particle water-sparkle';
+    sp.style.width = (2 + Math.random() * 3) + 'px';
+    sp.style.height = sp.style.width;
+    sp.style.left = (5 + Math.random() * 90) + '%';
+    sp.style.top = (35 + Math.random() * 55) + '%';
+    sp.style.animationDuration = (2 + Math.random() * 3) + 's';
+    sp.style.animationDelay = (Math.random() * 2) + 's';
+    container.appendChild(sp);
+  }
+}
+
+// --- Zone 3: Enchanted Garden ---
+function buildGardenScenery(container, h) {
+  // Large flowers on sides
+  const flowerColors = ['#FF6B9D','#FBBF24','#C084FC','#60A5FA','#4ADE80','#FB923C'];
+  for (let i = 0; i < 12; i++) {
+    const f = document.createElement('div');
+    f.className = 'flower';
+    f.style[i % 2 === 0 ? 'left' : 'right'] = (3 + Math.random() * 12) + '%';
+    f.style.bottom = (5 + i * 8) + '%';
+    const color = flowerColors[i % flowerColors.length];
+    const sz = 12 + Math.random() * 10;
+    f.innerHTML = `
+      <div class="flower-head" style="width:${sz}px;height:${sz}px;background:${color};box-shadow:0 0 8px ${color}44"></div>
+      <div class="flower-stem" style="height:${20 + Math.random() * 15}px"></div>
+    `;
+    container.appendChild(f);
+  }
+
+  // Butterflies
+  const butterflies = ['🦋','🌸','🦋','🌺'];
+  for (let i = 0; i < 6; i++) {
+    const b = document.createElement('div');
+    b.className = 'particle butterfly';
+    b.textContent = butterflies[i % butterflies.length];
+    b.style.left = (10 + Math.random() * 80) + '%';
+    b.style.top = (15 + Math.random() * 70) + '%';
+    b.style.animationDuration = (6 + Math.random() * 6) + 's';
+    b.style.animationDelay = (Math.random() * 4) + 's';
+    container.appendChild(b);
+  }
+}
+
+// --- Zone 4: Starlight Mountain ---
+function buildMountainScenery(container, h) {
+  // Mountains
+  const mtConfigs = [
+    { left: '-5%', w: 120, h: 100, color: '#1E293B' },
+    { right: '-3%', w: 100, h: 80, color: '#334155' },
+    { left: '8%', w: 80, h: 65, color: '#475569' },
+    { right: '10%', w: 90, h: 75, color: '#1E293B' },
+  ];
+
+  mtConfigs.forEach((cfg, i) => {
+    const mt = document.createElement('div');
+    mt.className = 'mountain';
+    mt.style.bottom = (20 + i * 18) + '%';
+    if (cfg.left) mt.style.left = cfg.left;
+    if (cfg.right) mt.style.right = cfg.right;
+    mt.style.borderLeft = `${cfg.w/2}px solid transparent`;
+    mt.style.borderRight = `${cfg.w/2}px solid transparent`;
+    mt.style.borderBottom = `${cfg.h}px solid ${cfg.color}`;
+    container.appendChild(mt);
+  });
+
+  // Small pines
+  for (let i = 0; i < 6; i++) {
+    const tree = document.createElement('div');
+    tree.className = 'pine tree';
+    tree.style[i % 2 === 0 ? 'left' : 'right'] = (4 + Math.random() * 8) + '%';
+    tree.style.bottom = (10 + i * 14) + '%';
+    tree.innerHTML = `
+      <div class="pine-top" style="border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:16px solid #1B3A2D;margin-bottom:-3px"></div>
+      <div class="pine-top" style="border-left:13px solid transparent;border-right:13px solid transparent;border-bottom:20px solid #234E3A"></div>
+      <div class="pine-trunk" style="width:5px;height:8px;background:#5C3D1E"></div>
+    `;
+    container.appendChild(tree);
+  }
+
+  // Twinkling stars
+  for (let i = 0; i < 20; i++) {
+    const star = document.createElement('div');
+    star.className = 'particle twinkle-star';
+    star.style.width = (2 + Math.random() * 3) + 'px';
+    star.style.height = star.style.width;
+    star.style.left = (3 + Math.random() * 94) + '%';
+    star.style.top = (5 + Math.random() * 60) + '%';
+    star.style.animationDuration = (1.5 + Math.random() * 3) + 's';
+    star.style.animationDelay = (Math.random() * 3) + 's';
+    container.appendChild(star);
+  }
+}
+
+// --- Zone 5: Victory Castle ---
+function buildCastleScenery(container, h) {
+  // Castle towers
+  const towers = [
+    { pos: 'left', x: '5%', w: 35, h: 90, roofW: 22, color: '#92400E', roofColor: '#DC2626' },
+    { pos: 'right', x: '5%', w: 30, h: 70, roofW: 18, color: '#78350F', roofColor: '#B91C1C' },
+    { pos: 'left', x: '10%', w: 25, h: 55, roofW: 16, color: '#A16207', roofColor: '#EF4444' },
+    { pos: 'right', x: '10%', w: 28, h: 65, roofW: 17, color: '#92400E', roofColor: '#DC2626' },
+  ];
+
+  towers.forEach((t, i) => {
+    const tower = document.createElement('div');
+    tower.className = 'castle-tower';
+    tower.style[t.pos] = t.x;
+    tower.style.bottom = (15 + i * 20) + '%';
+    tower.innerHTML = `
+      <div class="tower-roof" style="border-left:${t.roofW}px solid transparent;border-right:${t.roofW}px solid transparent;border-bottom:${t.roofW}px solid ${t.roofColor}"></div>
+      <div class="tower-body" style="width:${t.w}px;height:${t.h}px;background:${t.color}"></div>
+      <div class="tower-flag" style="background:${t.roofColor};left:${t.w/2 + 5}px"></div>
+    `;
+    container.appendChild(tower);
+  });
+
+  // Golden sparkles
+  for (let i = 0; i < 15; i++) {
+    const sp = document.createElement('div');
+    sp.className = 'particle gold-sparkle';
+    sp.style.width = (3 + Math.random() * 4) + 'px';
+    sp.style.height = sp.style.width;
+    sp.style.left = (5 + Math.random() * 90) + '%';
+    sp.style.top = (20 + Math.random() * 70) + '%';
+    sp.style.animationDuration = (2 + Math.random() * 3) + 's';
+    sp.style.animationDelay = (Math.random() * 2) + 's';
+    container.appendChild(sp);
+  }
+
+  // Celebration flags
+  for (let i = 0; i < 4; i++) {
+    const flag = document.createElement('div');
+    flag.style.position = 'absolute';
+    flag.style[i % 2 === 0 ? 'left' : 'right'] = (15 + i * 5) + '%';
+    flag.style.top = (50 + i * 10) + '%';
+    flag.style.fontSize = '20px';
+    flag.textContent = '🏴';
+    flag.style.opacity = '0.3';
+    container.appendChild(flag);
+  }
+}
+
+// ===== BUILD PATH =====
+function buildPath() {
+  buildScenery();
+
+  const container = document.getElementById('pathContainer');
+  const svg = document.getElementById('pathSvg');
+
+  container.querySelectorAll('.node, .character-wrapper').forEach(el => el.remove());
+
+  const lastY = NODE_POSITIONS[NODE_POSITIONS.length - 1].y;
+  container.style.height = (lastY + 120) + 'px';
+  svg.style.height = (lastY + 120) + 'px';
+
+  // Path line
+  svg.innerHTML = '';
+  let pathD = '';
+  NODE_POSITIONS.forEach((pos, i) => {
+    pathD += (i === 0 ? 'M' : 'L') + ` ${pos.x} ${pos.y} `;
+  });
+
+  const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  pathEl.setAttribute('d', pathD);
+  pathEl.setAttribute('fill', 'none');
+  pathEl.setAttribute('stroke', 'rgba(255,255,255,0.25)');
+  pathEl.setAttribute('stroke-width', '7');
+  pathEl.setAttribute('stroke-linecap', 'round');
+  pathEl.setAttribute('stroke-linejoin', 'round');
+  svg.appendChild(pathEl);
+
+  // Completed path highlight
+  if (state.position > 0) {
+    let completedD = '';
+    for (let i = 0; i < Math.min(state.position, TOTAL_SPACES); i++) {
+      completedD += (i === 0 ? 'M' : 'L') + ` ${NODE_POSITIONS[i].x} ${NODE_POSITIONS[i].y} `;
+    }
+    const cp = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    cp.setAttribute('d', completedD);
+    cp.setAttribute('fill', 'none');
+    cp.setAttribute('stroke', 'rgba(255,255,255,0.55)');
+    cp.setAttribute('stroke-width', '7');
+    cp.setAttribute('stroke-linecap', 'round');
+    cp.setAttribute('stroke-linejoin', 'round');
+    svg.appendChild(cp);
+  }
+
+  // Nodes
+  NODE_POSITIONS.forEach((pos, i) => {
+    const spaceNum = i + 1;
+    const isStar = spaceNum % STAR_INTERVAL === 0;
+    const isCompleted = spaceNum <= state.position;
+    const isCurrent = spaceNum === state.position;
+    const isNext = spaceNum === state.position + 1;
+    const isLocked = spaceNum > state.position + 1;
+
+    const zoneIdx = Math.floor(i / 20);
+    const zone = ZONES[Math.min(zoneIdx, ZONES.length - 1)];
+    const nodeColor = zone.nodeColors[i % zone.nodeColors.length];
+
+    const node = document.createElement('div');
+    node.className = 'node';
+    node.id = `node-${spaceNum}`;
+    if (isCompleted && !isCurrent) node.classList.add('completed');
+    if (isCurrent) node.classList.add('current');
+    if (isNext) node.classList.add('next');
+    if (isLocked && !isNext) node.classList.add('locked');
+    if (isStar) node.classList.add('star');
+
+    node.style.left = pos.x + 'px';
+    node.style.top = pos.y + 'px';
+
+    const circle = document.createElement('div');
+    circle.className = 'node-circle';
+
+    if (!isStar) {
+      if (isCompleted || isCurrent) {
+        circle.style.background = nodeColor;
+        circle.style.border = `3px solid ${nodeColor}`;
+      } else if (isNext) {
+        circle.style.background = `${nodeColor}66`;
+        circle.style.border = `3px solid ${nodeColor}AA`;
+      }
+    }
+
+    const num = document.createElement('div');
+    num.className = 'node-num';
+    num.textContent = spaceNum;
+
+    node.appendChild(circle);
+    node.appendChild(num);
+    container.appendChild(node);
+  });
+
+  // Character
+  if (state.position > 0 && state.position <= TOTAL_SPACES) {
+    const charPos = NODE_POSITIONS[state.position - 1];
+    const charWrapper = document.createElement('div');
+    charWrapper.className = 'character-wrapper';
+    charWrapper.id = 'character';
+    charWrapper.style.left = charPos.x + 'px';
+    charWrapper.style.top = (charPos.y - 56) + 'px';
+
+    const img = document.createElement('img');
+    img.className = 'character-img';
+    img.src = 'Character.png.png';
+    img.alt = 'Ryleigh';
+    img.onerror = function() {
+      this.style.display = 'none';
+      const fallback = document.createElement('div');
+      fallback.className = 'character-fallback';
+      fallback.textContent = '🐺';
+      charWrapper.appendChild(fallback);
+    };
+    charWrapper.appendChild(img);
+    container.appendChild(charWrapper);
+  }
+}
+
+// ===== SCROLL =====
+function scrollToCurrentNode(smooth = true) {
+  const targetIdx = Math.max(0, state.position - 1);
+  if (targetIdx >= NODE_POSITIONS.length) return;
+  const pos = NODE_POSITIONS[targetIdx];
+  const scrollTarget = pos.y + 90 - (window.innerHeight / 2);
+  window.scrollTo({ top: Math.max(0, scrollTarget), behavior: smooth ? 'smooth' : 'instant' });
+}
+
+// ===== GAME LOGIC =====
+let spinning = false;
+
+function spin() {
+  if (spinning) return;
+  if (state.position >= TOTAL_SPACES) { showFinish(); return; }
+
+  spinning = true;
+  const btn = document.getElementById('spinBtn');
+  const resultEl = document.getElementById('spinResult');
+  btn.disabled = true;
+
+  let count = 0;
+  const maxTicks = 12;
+  const interval = setInterval(() => {
+    resultEl.textContent = Math.ceil(Math.random() * 6);
+    count++;
+    if (count >= maxTicks) {
+      clearInterval(interval);
+      const roll = Math.ceil(Math.random() * 6);
+      resultEl.textContent = roll;
+      resultEl.style.animation = 'none';
+      void resultEl.offsetHeight;
+      resultEl.style.animation = 'popIn 0.4s ease';
+
+      let rawTarget = Math.min(state.position + roll, TOTAL_SPACES);
+      let landPos = rawTarget;
+      for (let s = state.position + 1; s <= rawTarget; s++) {
+        if (s % STAR_INTERVAL === 0) { landPos = s; break; }
+      }
+
+      animateMove(state.position, landPos, () => {
+        state.position = landPos;
+        if (landPos >= TOTAL_SPACES) {
+          saveState(); updateUI(); showFinish();
+          spinning = false; btn.disabled = false; return;
+        }
+        const isStar = landPos % STAR_INTERVAL === 0;
+        if (isStar) {
+          state.stars++; state.prizes++;
+          const prize = PRIZES[state.prizeIndex % PRIZES.length];
+          state.prizeIndex++;
+          state.log.push({ type: 'prize', text: prize.text, space: landPos });
+          saveState(); updateUI(); showPrize(prize);
+        } else {
+          state.challenges++;
+          state.streak++;
+          const challenge = CHALLENGES[Math.floor(Math.random() * CHALLENGES.length)];
+          state.log.push({ type: 'challenge', text: challenge.short, space: landPos });
+          saveState(); updateUI(); showChallenge(challenge);
+        }
+        checkZoneBanner(landPos);
+        spinning = false; btn.disabled = false;
+      });
+    }
+  }, 80);
+}
+
+function animateMove(from, to, callback) {
+  let current = from;
+  const step = () => {
+    current++;
+    if (current > to) { callback(); return; }
+    state.position = current;
+    buildPath();
+    updateStats();
+    scrollToCurrentNode(true);
+    setTimeout(step, 500);
+  };
+  step();
+}
+
+// ===== MODALS =====
+let pendingReveal = null; // stores what to show when card is tapped
+
+function showChallenge(challenge) {
+  pendingReveal = { type: 'challenge', challenge };
+  document.getElementById('modalCard').className = 'modal-card challenge';
+  document.getElementById('mysteryFront').style.display = 'block';
+  document.getElementById('modalRevealed').classList.remove('show');
+  document.getElementById('confettiBox').innerHTML = '';
+  document.getElementById('streakBadge').innerHTML = '';
+  document.getElementById('modal').classList.add('active');
+}
+
+function showPrize(prize) {
+  pendingReveal = { type: 'prize', prize };
+  document.getElementById('modalCard').className = 'modal-card prize';
+  document.getElementById('mysteryFront').querySelector('.mystery-question').textContent = '⭐';
+  document.getElementById('mysteryFront').style.display = 'block';
+  document.getElementById('modalRevealed').classList.remove('show');
+  document.getElementById('confettiBox').innerHTML = '';
+  document.getElementById('streakBadge').innerHTML = '';
+  document.getElementById('modal').classList.add('active');
+}
+
+function showFinish() {
+  pendingReveal = { type: 'finish' };
+  document.getElementById('modalCard').className = 'modal-card prize';
+  document.getElementById('mysteryFront').querySelector('.mystery-question').textContent = '🏆';
+  document.getElementById('mysteryFront').style.display = 'block';
+  document.getElementById('modalRevealed').classList.remove('show');
+  document.getElementById('confettiBox').innerHTML = '';
+  document.getElementById('streakBadge').innerHTML = '';
+  document.getElementById('modal').classList.add('active');
+}
+
+function revealCard() {
+  if (!pendingReveal) return;
+  document.getElementById('mysteryFront').style.display = 'none';
+  const revealed = document.getElementById('modalRevealed');
+  revealed.classList.add('show');
+
+  if (pendingReveal.type === 'challenge') {
+    const c = pendingReveal.challenge;
+    document.getElementById('modalEmoji').textContent = c.emoji;
+    document.getElementById('modalLabel').textContent = '🔮 Mystery Challenge';
+    document.getElementById('modalText').textContent = c.text;
+    document.getElementById('modalBtn').textContent = "Let's Do It! 💪";
+    // Show streak if > 1
+    if (state.streak > 1) {
+      document.getElementById('streakBadge').innerHTML =
+        '<div class="streak-badge">🔥 ' + state.streak + ' streak!</div>';
+    }
+  } else if (pendingReveal.type === 'prize') {
+    const p = pendingReveal.prize;
+    document.getElementById('modalEmoji').textContent = p.emoji;
+    document.getElementById('modalLabel').textContent = '⭐ STAR PRIZE!';
+    document.getElementById('modalText').textContent = p.text;
+    document.getElementById('modalBtn').textContent = 'Yay! 🎉';
+    spawnConfetti();
+  } else if (pendingReveal.type === 'finish') {
+    document.getElementById('modalEmoji').textContent = '🏆';
+    document.getElementById('modalLabel').textContent = '🎊 ADVENTURE COMPLETE!';
+    document.getElementById('modalText').textContent = "Amazing job, Ryleigh! You finished the entire adventure! You're a superstar!";
+    document.getElementById('modalBtn').textContent = 'I Did It! 👑';
+    spawnConfetti();
+  }
+}
+
+function completeCard() {
+  document.getElementById('modal').classList.remove('active');
+  // Reset mystery front for next time
+  document.getElementById('mysteryFront').querySelector('.mystery-question').textContent = '❓';
+  // Show celebration burst for challenges
+  if (pendingReveal && pendingReveal.type === 'challenge') {
+    showDoneBurst();
+  }
+  pendingReveal = null;
+}
+
+function closeModal() { completeCard(); }
+
+function showDoneBurst() {
+  const burst = document.createElement('div');
+  burst.className = 'done-burst';
+  burst.innerHTML = '<div class="big-check">✅</div>';
+  document.body.appendChild(burst);
+  setTimeout(() => burst.remove(), 900);
+}
+
+// Zone entry banner
+let lastAnnouncedZone = -1;
+const ZONE_BANNER_COLORS = [
+  'linear-gradient(135deg, #228B22, #4ADE80)',
+  'linear-gradient(135deg, #2563EB, #22D3EE)',
+  'linear-gradient(135deg, #EC4899, #C084FC)',
+  'linear-gradient(135deg, #7C3AED, #312E81)',
+  'linear-gradient(135deg, #D97706, #FBBF24)',
+];
+const ZONE_BANNER_EMOJIS = ['🌲', '💧', '🌸', '⛰️', '🏰'];
+
+function checkZoneBanner(position) {
+  const zoneIdx = Math.min(Math.floor((position - 1) / STAR_INTERVAL), ZONES.length - 1);
+  if (zoneIdx < 0) return;
+  if (zoneIdx !== lastAnnouncedZone && zoneIdx !== state.lastZone) {
+    lastAnnouncedZone = zoneIdx;
+    state.lastZone = zoneIdx;
+    saveState();
+    const banner = document.getElementById('zoneBanner');
+    banner.style.background = ZONE_BANNER_COLORS[zoneIdx];
+    banner.textContent = ZONE_BANNER_EMOJIS[zoneIdx] + ' ' + ZONES[zoneIdx].name + ' ' + ZONE_BANNER_EMOJIS[zoneIdx];
+    banner.classList.remove('show');
+    void banner.offsetHeight;
+    banner.classList.add('show');
+    setTimeout(() => banner.classList.remove('show'), 2200);
+  }
+}
+
+function spawnConfetti() {
+  const box = document.getElementById('confettiBox');
+  box.innerHTML = '';
+  const colors = ['#FF6B9D','#C084FC','#60A5FA','#FBBF24','#4ADE80','#FB923C'];
+  for (let i = 0; i < 40; i++) {
+    const piece = document.createElement('div');
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.cssText = `
+      position:absolute;left:${Math.random()*100}%;top:-10px;
+      width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;
+      background:${color};border-radius:${Math.random()>0.5?'50%':'2px'};
+      animation:confettiFall ${1.5+Math.random()}s ease-in ${Math.random()*0.5}s forwards;
+    `;
+    box.appendChild(piece);
+  }
+}
+
+const confettiStyle = document.createElement('style');
+confettiStyle.textContent = `@keyframes confettiFall{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(400px) rotate(${360+Math.random()*360}deg);opacity:0}}`;
+document.head.appendChild(confettiStyle);
+
+// ===== LOG =====
+function toggleLog() { document.getElementById('logPanel').classList.toggle('active'); }
+
+function updateLog() {
+  const list = document.getElementById('logList');
+  list.innerHTML = '';
+  [...state.log].reverse().forEach((item, i) => {
+    const idx = state.log.length - i;
+    const entry = document.createElement('div');
+    entry.className = `log-entry${item.type === 'prize' ? ' prize' : ''}`;
+    entry.innerHTML = `<span class="log-entry-num">${idx}</span><span>${item.type==='prize'?'⭐':'✅'} ${item.text} <small style="opacity:0.4">(#${item.space})</small></span>`;
+    list.appendChild(entry);
+  });
+  if (state.log.length === 0) list.innerHTML = '<div style="text-align:center;opacity:0.3;padding:40px;color:#666">No adventures yet! Tap Spin to start!</div>';
+}
+
+function updateStats() {
+  document.getElementById('posDisplay').textContent = state.position;
+  document.getElementById('challengeCount').textContent = state.challenges;
+  document.getElementById('starCount').textContent = state.stars;
+  document.getElementById('prizeCount').textContent = state.prizes;
+}
+
+function updateUI() { buildPath(); updateStats(); updateLog(); }
+
+function confirmReset() {
+  if (confirm('Reset the game? This will start Ryleigh back at space 1.')) {
+    resetGame();
+  }
+}
+
+function resetGame() {
+  state = defaultState(); saveState();
+  document.getElementById('spinResult').textContent = '';
+  sceneryBuilt = false;
+  updateUI();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ===== INSTALL BANNER =====
+function dismissBanner() {
+  document.getElementById('installBanner').classList.remove('show');
+  localStorage.setItem('ryleighBannerDismissed', 'true');
+}
+
+if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !navigator.standalone && !localStorage.getItem('ryleighBannerDismissed')) {
+  document.getElementById('installBanner').classList.add('show');
+}
+
+// ===== INIT =====
+updateUI();
+setTimeout(() => scrollToCurrentNode(false), 100);
+</script>
+</body>
+</html>
