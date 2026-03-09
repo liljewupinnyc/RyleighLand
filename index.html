@@ -3548,6 +3548,7 @@ function showMathProblem(callback) {
   const grade = getPlayerGrade();
   const problem = generateProblem(grade);
   currentProblem = problem;
+  speechMissCount = 0;
   stopCountdownTimer();
 
   const mathCard = document.querySelector('.math-card');
@@ -3862,10 +3863,39 @@ function normalizeSpokenTime(text) {
   return null;
 }
 
+function fuzzyMatch(spoken, answer) {
+  // Exact match
+  if (spoken === answer) return true;
+  // Spoken text contains the answer
+  if (spoken.includes(answer)) return true;
+  // Answer contains spoken (if spoken is 3+ chars)
+  if (spoken.length >= 3 && answer.includes(spoken)) return true;
+  // Levenshtein distance for close matches (1 char off for short words, 2 for long)
+  const maxDist = answer.length <= 4 ? 1 : 2;
+  if (levenshtein(spoken, answer) <= maxDist) return true;
+  return false;
+}
+
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({length: m + 1}, () => Array(n + 1).fill(0));
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] :
+        1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+    }
+  }
+  return dp[m][n];
+}
+
 function normalizeSpeechToAnswer(spokenText, problem) {
   const text = spokenText.trim().toLowerCase();
+  const answer = problem.answer.toLowerCase();
   const type = classifyProblemType(problem);
-  if (text === problem.answer.toLowerCase()) return problem.answer;
+  // Direct match always wins
+  if (text === answer) return problem.answer;
   switch (type) {
     case 'letter': {
       const upper = text.toUpperCase();
@@ -3878,15 +3908,28 @@ function normalizeSpeechToAnswer(spokenText, problem) {
     }
     case 'time':
       return normalizeSpokenTime(text);
-    case 'spelling':
+    case 'spelling': {
+      // Fuzzy match for reading/spelling words
+      if (fuzzyMatch(text, answer)) return problem.answer;
+      // Check each word in multi-word transcripts
+      const words = text.split(/\s+/);
+      for (const w of words) {
+        if (fuzzyMatch(w, answer)) return problem.answer;
+      }
       return text;
+    }
     case 'shape': {
       const cap = text.charAt(0).toUpperCase() + text.slice(1);
+      if (fuzzyMatch(text, answer)) return problem.answer;
       return cap;
     }
-    default: return text;
+    default:
+      if (fuzzyMatch(text, answer)) return problem.answer;
+      return text;
   }
 }
+
+let speechMissCount = 0; // track misses for kinder kid handling
 
 function startSpeechRecognition() {
   if (!isSpeechSupported || !currentProblem) return;
@@ -3898,28 +3941,37 @@ function startSpeechRecognition() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   speechRecognition = new SR();
   speechRecognition.lang = 'en-US';
-  speechRecognition.interimResults = false;
-  speechRecognition.maxAlternatives = 3;
+  speechRecognition.interimResults = true; // show real-time text
+  speechRecognition.maxAlternatives = 5;   // more alternatives to match
   speechRecognition.continuous = false;
 
   micBtn.classList.add('listening');
   micBtn.classList.remove('heard');
-  micLabel.textContent = 'Listening...';
-  micStatus.textContent = '';
+  micLabel.textContent = '🔴 Listening...';
+  micStatus.textContent = 'Speak now!';
   micStatus.className = 'mic-status';
 
   speechTimeout = setTimeout(() => {
     stopSpeechRecognition();
-    micStatus.textContent = "Didn't hear anything. Tap to try again!";
+    micStatus.textContent = "Didn't hear anything. Tap 🎤 to try again!";
     micStatus.className = 'mic-status error';
-  }, 5000);
+    // Don't count timeout as wrong — just let them retry
+  }, 10000);
 
   speechRecognition.onresult = (event) => {
+    const result = event.results[event.results.length - 1];
+
+    // Show interim results as the person speaks
+    if (!result.isFinal) {
+      micLabel.textContent = '🔴 "' + result[0].transcript.trim() + '"...';
+      return;
+    }
+
     clearTimeout(speechTimeout);
-    const results = event.results[0];
     let matched = null;
-    for (let i = 0; i < results.length; i++) {
-      const transcript = results[i].transcript;
+    // Check all alternatives for a match
+    for (let i = 0; i < result.length; i++) {
+      const transcript = result[i].transcript;
       const normalized = normalizeSpeechToAnswer(transcript, currentProblem);
       if (normalized && String(normalized) === String(currentProblem.answer)) {
         matched = transcript; break;
@@ -3927,15 +3979,27 @@ function startSpeechRecognition() {
     }
     stopSpeechRecognition();
     if (matched) {
+      speechMissCount = 0;
       micBtn.classList.add('heard');
       micLabel.textContent = '✅ "' + matched.trim() + '"';
       handleSpeechCorrect();
     } else {
-      const heard = results[0].transcript.trim();
-      micLabel.textContent = 'Tap to speak';
-      micStatus.textContent = 'Heard "' + heard + '" — not quite! Try again.';
-      micStatus.className = 'mic-status error';
-      handleSpeechWrong();
+      const heard = result[0].transcript.trim();
+      speechMissCount++;
+      const isKid = getPlayerGrade() < 21;
+
+      if (isKid && speechMissCount <= 2) {
+        // Kids get free retries — don't count as wrong
+        micLabel.textContent = 'Tap to speak';
+        micStatus.textContent = 'I heard "' + heard + '" — try again! 😊';
+        micStatus.className = 'mic-status error';
+        // Don't call handleSpeechWrong for kids on first 2 misses
+      } else {
+        micLabel.textContent = 'Tap to speak';
+        micStatus.textContent = 'Heard "' + heard + '" — try again or tap an answer';
+        micStatus.className = 'mic-status error';
+        handleSpeechWrong();
+      }
     }
   };
 
@@ -3943,13 +4007,17 @@ function startSpeechRecognition() {
     clearTimeout(speechTimeout);
     stopSpeechRecognition();
     if (event.error === 'not-allowed') {
-      micStatus.textContent = 'Microphone access denied. Check Settings.';
+      micStatus.textContent = '⚠️ Microphone blocked. Go to Settings → Safari → Microphone → Allow';
+      micStatus.className = 'mic-status error';
     } else if (event.error === 'no-speech') {
-      micStatus.textContent = 'No speech detected. Tap to try again!';
+      micStatus.textContent = 'No speech detected. Tap 🎤 to try again!';
+      micStatus.className = 'mic-status error';
+    } else if (event.error === 'aborted') {
+      // Ignore — we caused this via stopSpeechRecognition
     } else {
-      micStatus.textContent = 'Could not hear you. Try again!';
+      micStatus.textContent = 'Could not hear you. Tap 🎤 to try again!';
+      micStatus.className = 'mic-status error';
     }
-    micStatus.className = 'mic-status error';
   };
 
   speechRecognition.onend = () => {
@@ -3959,7 +4027,13 @@ function startSpeechRecognition() {
     }
   };
 
-  speechRecognition.start();
+  try {
+    speechRecognition.start();
+  } catch (e) {
+    micStatus.textContent = 'Mic not available. Use the buttons instead!';
+    micStatus.className = 'mic-status error';
+    micBtn.classList.remove('listening');
+  }
 }
 
 function stopSpeechRecognition() {
