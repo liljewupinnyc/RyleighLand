@@ -1444,6 +1444,74 @@ body {
 }
 .mic-status.error { color: #EF4444; }
 
+/* ===== VOICE-ONLY MODE ===== */
+.voice-only-mode #mathChoices { display: none !important; }
+.voice-only-mode .mic-divider span { font-size: 0; }
+.voice-only-mode .mic-divider span::after {
+  content: 'speak your answer';
+  font-size: 0.75rem;
+}
+.voice-only-mode .mic-container { margin-top: 8px; }
+
+/* ===== COUNTDOWN TIMER ===== */
+.countdown-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 12px;
+  gap: 4px;
+}
+.countdown-ring {
+  position: relative;
+  width: 70px;
+  height: 70px;
+}
+.countdown-svg {
+  width: 70px;
+  height: 70px;
+  transform: rotate(-90deg);
+}
+.countdown-track {
+  fill: none;
+  stroke: #E5E7EB;
+  stroke-width: 5;
+}
+.countdown-fill {
+  fill: none;
+  stroke: #4ADE80;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-dasharray: 226.195;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1s linear, stroke 0.3s;
+}
+.countdown-fill.warning { stroke: #FBBF24; }
+.countdown-fill.danger { stroke: #EF4444; }
+.countdown-number {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.5rem;
+  color: #374151;
+}
+.countdown-number.danger { color: #EF4444; animation: countdownPulse 0.5s ease infinite; }
+@keyframes countdownPulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.2); }
+}
+.countdown-label {
+  font-size: 0.75rem;
+  color: #9CA3AF;
+  font-family: 'Fredoka One', cursive;
+}
+.countdown-expired {
+  color: #EF4444;
+  font-weight: bold;
+  font-size: 0.85rem;
+}
+
 /* ===== CELEBRATION POPUP ===== */
 .celebration-overlay {
   display: none;
@@ -2055,6 +2123,16 @@ body {
         <span class="mic-label" id="micLabel">Tap to speak</span>
       </button>
       <div class="mic-status" id="micStatus"></div>
+    </div>
+    <div class="countdown-container" id="countdownContainer" style="display:none">
+      <div class="countdown-ring">
+        <svg class="countdown-svg" viewBox="0 0 80 80">
+          <circle class="countdown-track" cx="40" cy="40" r="36"/>
+          <circle class="countdown-fill" id="countdownFill" cx="40" cy="40" r="36"/>
+        </svg>
+        <div class="countdown-number" id="countdownNumber">10</div>
+      </div>
+      <div class="countdown-label" id="countdownLabel">⏱️ No searching!</div>
     </div>
     <div class="math-score" id="mathScore"></div>
   </div>
@@ -3184,7 +3262,12 @@ function generateSpelling(grade) {
   else { words = SPELLING_GRADE1; numWrongs = 2; }
   const w = words[Math.floor(Math.random() * words.length)];
   const wrongs = shuffle(w.wrongs).slice(0, numWrongs);
-  return { question: `${w.emoji} How do you spell this?`, display: w.word.toUpperCase(), choices: shuffle([w.word, ...wrongs]), answer: w.word };
+  if (grade >= 21) {
+    // Adults: voice-only, show clue sentence, no choices
+    return { question: `Spell this word:`, display: w.emoji, choices: shuffle([w.word, ...wrongs]), answer: w.word, voiceOnly: true, timer: 10 };
+  }
+  // Kids: show emoji as clue, multiple choice (don't show the actual word!)
+  return { question: `${w.emoji} Spell the word for this!`, display: w.emoji, choices: shuffle([w.word, ...wrongs]), answer: w.word };
 }
 
 // ===== ADULT PROBLEMS =====
@@ -3207,7 +3290,7 @@ const ADULT_TRIVIA = [
 
 function generateAdultTrivia() {
   const t = ADULT_TRIVIA[Math.floor(Math.random() * ADULT_TRIVIA.length)];
-  return { question: t.q, display: '', choices: shuffle([...t.choices]), answer: t.a };
+  return { question: t.q, display: '🧠', choices: shuffle([...t.choices]), answer: t.a, voiceOnly: true, timer: 10 };
 }
 
 function generateAdultMath() {
@@ -3227,7 +3310,7 @@ function generateAdultMath() {
     b = Math.floor(Math.random() * (a - 10)) + 10;
     answer = a - b;
   }
-  return { question: `${a} ${op} ${b} = ?`, display: '', choices: genNumberChoices(answer, 4, Math.max(0, answer - 50), answer + 50), answer: String(answer) };
+  return { question: `${a} ${op} ${b} = ?`, display: '', choices: genNumberChoices(answer, 4, Math.max(0, answer - 50), answer + 50), answer: String(answer), voiceOnly: true, timer: 15 };
 }
 
 function generateMultiplication(grade) {
@@ -3356,8 +3439,19 @@ function showMathProblem(callback) {
   const grade = getPlayerGrade();
   const problem = generateProblem(grade);
   currentProblem = problem;
+  stopCountdownTimer();
 
+  const mathCard = document.querySelector('.math-card');
   const displayEl = document.getElementById('mathDisplay');
+  const choicesEl = document.getElementById('mathChoices');
+  const countdownContainer = document.getElementById('countdownContainer');
+  const micContainer = document.getElementById('micContainer');
+
+  // Reset voice-only mode class
+  mathCard.classList.remove('voice-only-mode');
+  choicesEl.style.display = '';
+  countdownContainer.style.display = 'none';
+
   if (problem.isHtml) {
     displayEl.innerHTML = problem.display;
     displayEl.style.display = '';
@@ -3375,7 +3469,7 @@ function showMathProblem(callback) {
   document.getElementById('mathQuestion').textContent = problem.question;
   document.getElementById('mathScore').textContent = `Score: ${state.mathCorrect}/${state.mathTotal}`;
 
-  const choicesEl = document.getElementById('mathChoices');
+  // Build choice buttons (always created, even if hidden in voice-only)
   choicesEl.innerHTML = '';
   problem.choices.forEach(choice => {
     const btn = document.createElement('button');
@@ -3385,9 +3479,30 @@ function showMathProblem(callback) {
     choicesEl.appendChild(btn);
   });
 
-  // Show/hide speech recognition mic
-  const micContainer = document.getElementById('micContainer');
-  if (isSpeechSupported && canUseMicForProblem(problem)) {
+  // Voice-only mode (adult questions with timer)
+  const isVoiceOnly = problem.voiceOnly && isSpeechSupported;
+
+  if (isVoiceOnly) {
+    // Hide choices, show mic prominently with countdown
+    mathCard.classList.add('voice-only-mode');
+    micContainer.style.display = '';
+    document.getElementById('micBtn').disabled = false;
+    document.getElementById('micBtn').classList.remove('listening', 'heard');
+    document.getElementById('micLabel').textContent = 'Tap to speak';
+    document.getElementById('micStatus').textContent = '';
+    document.getElementById('micStatus').className = 'mic-status';
+    // Start countdown timer
+    if (problem.timer) {
+      startCountdownTimer(problem.timer);
+    }
+  } else if (problem.voiceOnly && !isSpeechSupported) {
+    // Voice-only intended but no mic support — show choices + timer as fallback
+    micContainer.style.display = 'none';
+    if (problem.timer) {
+      startCountdownTimer(problem.timer);
+    }
+  } else if (isSpeechSupported && canUseMicForProblem(problem)) {
+    // Regular mode with optional mic
     micContainer.style.display = '';
     document.getElementById('micBtn').disabled = false;
     document.getElementById('micBtn').classList.remove('listening', 'heard');
@@ -3436,6 +3551,7 @@ function showCelebration(callback) {
 
 function checkMathAnswer(btn, selected, problem) {
   stopSpeechRecognition();
+  stopCountdownTimer();
   const micBtn = document.getElementById('micBtn');
   if (micBtn) micBtn.disabled = true;
   state.mathTotal++;
@@ -3450,6 +3566,7 @@ function checkMathAnswer(btn, selected, problem) {
     document.querySelectorAll('.math-choice-btn').forEach(b => b.disabled = true);
     setTimeout(() => {
       document.getElementById('mathOverlay').classList.remove('active');
+      document.querySelector('.math-card').classList.remove('voice-only-mode');
       showCelebration(() => {
         if (mathCallback) { mathCallback(); mathCallback = null; }
       });
@@ -3696,6 +3813,7 @@ function stopSpeechRecognition() {
 }
 
 function handleSpeechCorrect() {
+  stopCountdownTimer();
   state.mathTotal++;
   state.mathCorrect++;
   state.mathStreak = (state.mathStreak || 0) + 1;
@@ -3707,6 +3825,7 @@ function handleSpeechCorrect() {
   document.getElementById('micBtn').disabled = true;
   setTimeout(() => {
     document.getElementById('mathOverlay').classList.remove('active');
+    document.querySelector('.math-card').classList.remove('voice-only-mode');
     showCelebration(() => {
       if (mathCallback) { mathCallback(); mathCallback = null; }
     });
@@ -3721,6 +3840,98 @@ function handleSpeechWrong() {
   const micBtn = document.getElementById('micBtn');
   micBtn.style.animation = 'shake 0.4s ease';
   setTimeout(() => { micBtn.style.animation = ''; }, 400);
+}
+
+// ===== COUNTDOWN TIMER (Voice-Only Mode) =====
+let countdownInterval = null;
+let countdownRemaining = 0;
+
+function startCountdownTimer(seconds) {
+  stopCountdownTimer();
+  countdownRemaining = seconds;
+  const totalSeconds = seconds;
+  const circumference = 2 * Math.PI * 36; // r=36 from SVG
+  const container = document.getElementById('countdownContainer');
+  const numberEl = document.getElementById('countdownNumber');
+  const fillEl = document.getElementById('countdownFill');
+  const labelEl = document.getElementById('countdownLabel');
+
+  container.style.display = '';
+  numberEl.textContent = seconds;
+  numberEl.className = 'countdown-number';
+  fillEl.style.strokeDashoffset = '0';
+  fillEl.className = 'countdown-fill';
+  labelEl.textContent = '⏱️ No searching!';
+  labelEl.className = 'countdown-label';
+
+  countdownInterval = setInterval(() => {
+    countdownRemaining--;
+    const fraction = countdownRemaining / totalSeconds;
+    const offset = circumference * (1 - fraction);
+    fillEl.style.strokeDashoffset = offset;
+    numberEl.textContent = countdownRemaining;
+
+    // Color transitions
+    if (countdownRemaining <= 3) {
+      fillEl.className = 'countdown-fill danger';
+      numberEl.className = 'countdown-number danger';
+    } else if (countdownRemaining <= Math.ceil(totalSeconds * 0.4)) {
+      fillEl.className = 'countdown-fill warning';
+      numberEl.className = 'countdown-number';
+    }
+
+    if (countdownRemaining <= 0) {
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+      handleTimerExpired();
+    }
+  }, 1000);
+}
+
+function stopCountdownTimer() {
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+    countdownInterval = null;
+  }
+}
+
+function handleTimerExpired() {
+  stopSpeechRecognition();
+  const micBtn = document.getElementById('micBtn');
+  if (micBtn) micBtn.disabled = true;
+  const numberEl = document.getElementById('countdownNumber');
+  const labelEl = document.getElementById('countdownLabel');
+  numberEl.textContent = '0';
+  labelEl.textContent = '⏰ Time\'s up!';
+  labelEl.className = 'countdown-label countdown-expired';
+
+  // Count as wrong — no answer given
+  state.mathTotal++;
+  state.mathStreak = 0;
+  saveState();
+  document.getElementById('mathScore').textContent = `Score: ${state.mathCorrect}/${state.mathTotal}`;
+
+  // Show the answer briefly, then reveal choices as fallback
+  const micStatus = document.getElementById('micStatus');
+  micStatus.textContent = 'Answer: ' + currentProblem.answer;
+  micStatus.className = 'mic-status error';
+
+  // Show choices so they can proceed
+  const choicesEl = document.getElementById('mathChoices');
+  choicesEl.style.display = '';
+  document.querySelectorAll('.math-choice-btn').forEach(b => b.disabled = true);
+  // Highlight the correct answer
+  document.querySelectorAll('.math-choice-btn').forEach(b => {
+    if (String(b.textContent) === String(currentProblem.answer)) {
+      b.classList.add('correct');
+    }
+  });
+
+  setTimeout(() => {
+    document.getElementById('mathOverlay').classList.remove('active');
+    document.querySelector('.math-card').classList.remove('voice-only-mode');
+    if (mathCallback) { mathCallback(); mathCallback = null; }
+  }, 2000);
 }
 
 // ===== MODALS =====
