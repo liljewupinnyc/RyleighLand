@@ -1304,6 +1304,7 @@ body {
 }
 .math-overlay.active { display: flex; }
 .math-card {
+  position: relative;
   background: white;
   border-radius: 28px;
   padding: 32px 28px;
@@ -1313,6 +1314,7 @@ body {
   animation: cardSlideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   box-shadow: 0 25px 60px rgba(0,0,0,0.2);
   border: 3px solid #60A5FA;
+  overflow: visible;
 }
 .math-label {
   font-family: 'Fredoka One', cursive;
@@ -1443,6 +1445,30 @@ body {
   text-align: center;
 }
 .mic-status.error { color: #EF4444; }
+
+/* ===== ADULT INSULT TOAST ===== */
+.adult-insult-toast {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #1F2937;
+  color: #FF6B6B;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1rem;
+  padding: 16px 20px;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(-100%);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+  z-index: 9999;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+.adult-insult-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
 
 /* ===== VOICE-ONLY MODE ===== */
 .voice-only-mode #mathChoices { display: none !important; }
@@ -2296,6 +2322,74 @@ const STORAGE_KEY = 'ryleighLand_profiles';
 const GRADE_LABELS = { '-1': 'Pre-K', '0': 'Kindergarten', '1': '1st Grade', '2': '2nd Grade', '3': '3rd Grade', '4': '4th Grade', '5': '5th Grade', '21': 'Adult Mode 🍺' };
 const AVATARS = ['🐺','🦄','🐱','🐶','🦊','🐼','🦋','🌟'];
 
+// ===== CLOUD SYNC (Firebase Realtime Database) =====
+const FIREBASE_DB_URL = 'https://ryleighland-default-rtdb.firebaseio.com';
+let cloudPlayers = []; // players fetched from cloud
+
+async function syncPlayerToCloud(player) {
+  if (!FIREBASE_DB_URL) return;
+  try {
+    const data = {
+      id: player.id,
+      name: player.name,
+      grade: player.grade,
+      avatar: player.avatar,
+      position: player.gameState.position,
+      challenges: player.gameState.challenges,
+      stars: player.gameState.stars,
+      prizes: player.gameState.prizes,
+      mathCorrect: player.gameState.mathCorrect,
+      mathTotal: player.gameState.mathTotal,
+      badges: player.gameState.badges || [],
+      lastUpdated: Date.now()
+    };
+    const resp = await fetch(`${FIREBASE_DB_URL}/players/${player.id}.json`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+    if (!resp.ok) return; // Firebase not set up yet, silently skip
+  } catch (e) { /* Cloud sync failed, silently skip */ }
+}
+
+async function fetchCloudPlayers() {
+  if (!FIREBASE_DB_URL) return [];
+  try {
+    const resp = await fetch(`${FIREBASE_DB_URL}/players.json`);
+    if (!resp.ok) return [];
+    const data = await resp.json();
+    if (!data || typeof data !== 'object') return [];
+    return Object.values(data).filter(p => p && typeof p === 'object' && p.name && p.id);
+  } catch (e) { console.log('Cloud fetch failed:', e); return []; }
+}
+
+async function syncAllLocalPlayersToCloud() {
+  if (!FIREBASE_DB_URL) return;
+  for (const p of profiles.players) {
+    await syncPlayerToCloud(p);
+  }
+}
+
+function mergeCloudPlayersForLeaderboard(localPlayers, cloud) {
+  // Start with local players
+  const merged = localPlayers.map(p => ({
+    id: p.id, name: p.name, avatar: p.avatar, grade: p.grade,
+    position: p.gameState.position, challenges: p.gameState.challenges,
+    isLocal: true
+  }));
+  const localIds = new Set(localPlayers.map(p => p.id));
+  // Add cloud-only players
+  cloud.forEach(cp => {
+    if (!localIds.has(cp.id)) {
+      merged.push({
+        id: cp.id, name: cp.name, avatar: cp.avatar, grade: cp.grade,
+        position: cp.position || 0, challenges: cp.challenges || 0,
+        isLocal: false
+      });
+    }
+  });
+  return merged;
+}
+
 function defaultGameState() {
   return { position: 0, challenges: 0, stars: 0, prizes: 0, log: [], prizeIndex: 0, streak: 0, bestStreak: 0, lastZone: -1, mathCorrect: 0, mathTotal: 0, mathStreak: 0, bestMathStreak: 0, mathBonus: false, badges: [] };
 }
@@ -2360,6 +2454,7 @@ function saveState() {
   if (activePlayer) {
     activePlayer.gameState = state;
     saveProfiles();
+    syncPlayerToCloud(activePlayer); // non-blocking cloud push
   }
 }
 
@@ -2387,6 +2482,15 @@ function renderWelcomeScreen() {
     container.appendChild(card);
   });
   renderLeaderboard();
+  // Fetch cloud players in background and re-render leaderboard
+  fetchCloudPlayers().then(cloud => {
+    if (cloud.length > 0) {
+      cloudPlayers = cloud;
+      renderLeaderboard();
+    }
+  });
+  // Also sync all local players to cloud
+  syncAllLocalPlayersToCloud();
 }
 
 function renderLeaderboard() {
@@ -2398,17 +2502,20 @@ function renderLeaderboard() {
     const btn = document.getElementById('newPlayerBtn');
     btn.parentNode.insertBefore(lb, btn);
   }
-  if (profiles.players.length < 2) { lb.innerHTML = ''; return; }
-  const sorted = [...profiles.players].sort((a, b) => b.gameState.position - a.gameState.position);
+  // Merge local + cloud players for leaderboard
+  const merged = mergeCloudPlayersForLeaderboard(profiles.players, cloudPlayers);
+  if (merged.length < 2) { lb.innerHTML = ''; return; }
+  const sorted = merged.sort((a, b) => b.position - a.position);
   const ranks = ['🥇','🥈','🥉'];
   let html = '<div class="leaderboard-title">🏅 Leaderboard</div>';
   sorted.forEach((p, i) => {
     const rank = i < 3 ? ranks[i] : `${i + 1}`;
+    const cloudTag = p.isLocal ? '' : ' <span style="font-size:0.6rem;opacity:0.5">☁️</span>';
     html += `<div class="leaderboard-row">
       <div class="lb-rank">${rank}</div>
       <div class="lb-avatar">${p.avatar}</div>
-      <div class="lb-name">${p.name}</div>
-      <div class="lb-stats">Space ${p.gameState.position} · ✅ ${p.gameState.challenges}</div>
+      <div class="lb-name">${p.name}${cloudTag}</div>
+      <div class="lb-stats">Space ${p.position} · ✅ ${p.challenges}</div>
     </div>`;
   });
   lb.innerHTML = html;
@@ -2482,8 +2589,10 @@ function createNewPlayer() {
   if (!formAvatar) { alert('Please pick an avatar!'); return; }
   const grade = ageToGrade(formAge);
   const id = 'player_' + Date.now();
-  profiles.players.push({ id, name, grade, avatar: formAvatar, gameState: defaultGameState() });
+  const newPlayer = { id, name, grade, avatar: formAvatar, gameState: defaultGameState() };
+  profiles.players.push(newPlayer);
   saveProfiles();
+  syncPlayerToCloud(newPlayer); // push new player to cloud
   hideNewPlayerForm();
   startGame(id);
 }
@@ -3576,8 +3685,61 @@ function checkMathAnswer(btn, selected, problem) {
     btn.classList.add('wrong');
     saveState();
     document.getElementById('mathScore').textContent = `Score: ${state.mathCorrect}/${state.mathTotal}`;
+    showAdultInsult();
     setTimeout(() => btn.classList.remove('wrong'), 400);
   }
+}
+
+// ===== ADULT WRONG-ANSWER INSULTS =====
+const ADULT_INSULTS = [
+  "This is a KIDS game and you still got it wrong 💀",
+  "A 6-year-old would've gotten that. You good? 😬",
+  "Bro... this is literally designed for children 🤡",
+  "Your brain called. It quit. 🧠💨",
+  "Are you smarter than a 2nd grader? Clearly not. 📉",
+  "That was embarrassing even by adult standards 😂",
+  "Autocorrect couldn't save that answer 💀",
+  "Did you just guess? Because even guessing would be better 🎲",
+  "The kindergartners are laughing at you right now 👶😂",
+  "I've seen better answers from a Magic 8-Ball 🎱",
+  "Your diploma is crying somewhere 🎓😭",
+  "Tell me you peaked in high school without telling me 📚",
+  "Siri would've gotten that. Alexa too. Even Clippy. 📎",
+  "That answer was so wrong it needs its own support group 🪑",
+  "You're making the leaderboard look bad. For everyone. 📊",
+  "Maybe stick to coloring books? No judgment. 🖍️",
+  "The WiFi is working. Your brain isn't. 📡🚫",
+  "I'd roast you harder but I feel bad at this point 🔥😔",
+  "Even a drunk you should've known that 🍺",
+  "Plot twist: the toddlers are winning 👶🏆",
+];
+
+function getAdultInsult() {
+  return ADULT_INSULTS[Math.floor(Math.random() * ADULT_INSULTS.length)];
+}
+
+function showAdultInsult() {
+  const grade = getPlayerGrade();
+  if (grade < 21) return;
+  const insult = getAdultInsult();
+  // Show insult as a fixed banner at top of screen
+  let toast = document.getElementById('adultInsultToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'adultInsultToast';
+    toast.className = 'adult-insult-toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = insult;
+  // Reset then show with a tiny delay so CSS transition triggers
+  toast.classList.remove('show');
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      toast.classList.add('show');
+    });
+  });
+  clearTimeout(toast._hideTimer);
+  toast._hideTimer = setTimeout(() => { toast.classList.remove('show'); }, 3500);
 }
 
 // ===== SPEECH RECOGNITION =====
@@ -3837,6 +3999,7 @@ function handleSpeechWrong() {
   state.mathStreak = 0;
   saveState();
   document.getElementById('mathScore').textContent = `Score: ${state.mathCorrect}/${state.mathTotal}`;
+  showAdultInsult();
   const micBtn = document.getElementById('micBtn');
   micBtn.style.animation = 'shake 0.4s ease';
   setTimeout(() => { micBtn.style.animation = ''; }, 400);
@@ -3910,6 +4073,7 @@ function handleTimerExpired() {
   state.mathStreak = 0;
   saveState();
   document.getElementById('mathScore').textContent = `Score: ${state.mathCorrect}/${state.mathTotal}`;
+  showAdultInsult();
 
   // Show the answer briefly, then reveal choices as fallback
   const micStatus = document.getElementById('micStatus');
