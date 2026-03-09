@@ -3375,8 +3375,8 @@ function generateSpelling(grade) {
     // Adults: voice-only, show clue sentence, no choices
     return { question: `Spell this word:`, display: w.emoji, choices: shuffle([w.word, ...wrongs]), answer: w.word, voiceOnly: true, timer: 10 };
   }
-  // Kids: show emoji as clue, multiple choice (don't show the actual word!)
-  return { question: `${w.emoji} Spell the word for this!`, display: w.emoji, choices: shuffle([w.word, ...wrongs]), answer: w.word };
+  // Kids: show the word to read aloud, with spelling choices as backup
+  return { question: `🎤 Click the microphone and read this word!`, display: w.word.toUpperCase(), choices: shuffle([w.word, ...wrongs]), answer: w.word };
 }
 
 // ===== ADULT PROBLEMS =====
@@ -3830,7 +3830,7 @@ function classifyProblemType(problem) {
   if (q.includes('Which shape has')) return 'shape_emoji';
   if (q.includes('What shape')) return 'shape';
   if (q.includes('What time')) return 'time';
-  if (q.includes('spell')) return 'spelling';
+  if (q.includes('spell') || q.includes('read this word') || q.includes('Spell')) return 'spelling';
   if (q.includes('What comes next')) return 'pattern';
   return 'math';
 }
