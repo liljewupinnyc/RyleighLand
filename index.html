@@ -3372,8 +3372,8 @@ function generateSpelling(grade) {
   const w = words[Math.floor(Math.random() * words.length)];
   const wrongs = shuffle(w.wrongs).slice(0, numWrongs);
   if (grade >= 21) {
-    // Adults: voice-only, show clue sentence, no choices
-    return { question: `Spell this word:`, display: w.emoji, choices: shuffle([w.word, ...wrongs]), answer: w.word, voiceOnly: true, timer: 10 };
+    // Adults: show choices with timer
+    return { question: `Spell this word:`, display: w.emoji, choices: shuffle([w.word, ...wrongs]), answer: w.word, timer: 10 };
   }
   // Kids: show the word to read aloud, with spelling choices as backup
   return { question: `🎤 Click the microphone and read this word!`, display: w.word.toUpperCase(), choices: shuffle([w.word, ...wrongs]), answer: w.word };
@@ -3399,7 +3399,7 @@ const ADULT_TRIVIA = [
 
 function generateAdultTrivia() {
   const t = ADULT_TRIVIA[Math.floor(Math.random() * ADULT_TRIVIA.length)];
-  return { question: t.q, display: '🧠', choices: shuffle([...t.choices]), answer: t.a, voiceOnly: true, timer: 10 };
+  return { question: t.q, display: '🧠', choices: shuffle([...t.choices]), answer: t.a, timer: 10 };
 }
 
 function generateAdultMath() {
@@ -3419,7 +3419,7 @@ function generateAdultMath() {
     b = Math.floor(Math.random() * (a - 10)) + 10;
     answer = a - b;
   }
-  return { question: `${a} ${op} ${b} = ?`, display: '', choices: genNumberChoices(answer, 4, Math.max(0, answer - 50), answer + 50), answer: String(answer), voiceOnly: true, timer: 15 };
+  return { question: `${a} ${op} ${b} = ?`, display: '', choices: genNumberChoices(answer, 4, Math.max(0, answer - 50), answer + 50), answer: String(answer), timer: 15 };
 }
 
 function generateMultiplication(grade) {
@@ -3619,8 +3619,10 @@ function showMathProblem(callback) {
     document.getElementById('micLabel').textContent = 'Tap to speak';
     document.getElementById('micStatus').textContent = '';
     document.getElementById('micStatus').className = 'mic-status';
+    if (problem.timer) { startCountdownTimer(problem.timer); }
   } else {
     micContainer.style.display = 'none';
+    if (problem.timer) { startCountdownTimer(problem.timer); }
   }
 
   document.getElementById('mathOverlay').classList.add('active');
