@@ -1225,6 +1225,17 @@ body {
   background: #D1FAE5;
   color: #065F46;
 }
+.grade-btn.adult-btn {
+  border-color: #F59E0B;
+  background: #FEF3C7;
+  color: #92400E;
+  grid-column: 1 / -1;
+}
+.grade-btn.adult-btn.selected {
+  border-color: #D97706;
+  background: #FDE68A;
+  color: #78350F;
+}
 .avatar-picker {
   display: flex;
   gap: 8px;
@@ -1938,7 +1949,11 @@ body {
       <button class="grade-btn" data-age="5" onclick="pickAge(this)">5</button>
       <button class="grade-btn" data-age="6" onclick="pickAge(this)">6</button>
       <button class="grade-btn" data-age="7" onclick="pickAge(this)">7</button>
-      <button class="grade-btn" data-age="8" onclick="pickAge(this)">8+</button>
+      <button class="grade-btn" data-age="8" onclick="pickAge(this)">8</button>
+      <button class="grade-btn" data-age="9" onclick="pickAge(this)">9</button>
+      <button class="grade-btn" data-age="10" onclick="pickAge(this)">10</button>
+      <button class="grade-btn" data-age="11" onclick="pickAge(this)">11+</button>
+      <button class="grade-btn adult-btn" data-age="21" onclick="pickAge(this)">21+ 🍺</button>
     </div>
     <div class="form-label">Pick your avatar!</div>
     <div class="avatar-picker" id="avatarPicker">
@@ -2096,11 +2111,53 @@ const CHALLENGES_BY_AGE = {
     { text: "Write in a journal — what happened today? 📓", emoji: "📓", short: "Journal Entry" },
     { text: "Teach someone in your family something you learned 🧑‍🏫", emoji: "🧑‍🏫", short: "Be the Teacher" },
   ],
+  upperElem: [
+    { text: "Read for 30 minutes — any book you choose! 📖", emoji: "📖", short: "Reading Time" },
+    { text: "Write a short story (at least 1 page) 📝", emoji: "📝", short: "Short Story" },
+    { text: "Practice multiplication tables for 10 minutes 🔢", emoji: "🔢", short: "Times Tables" },
+    { text: "Do a science experiment — make a volcano or slime! 🌋", emoji: "🌋", short: "Science Experiment" },
+    { text: "Run a lap around the yard or do 50 jumping jacks 🏃", emoji: "🏃", short: "Fitness Challenge" },
+    { text: "Learn 5 new vocabulary words and use them in sentences 📚", emoji: "📚", short: "Vocabulary" },
+    { text: "Draw a map of your neighborhood from memory 🗺️", emoji: "🗺️", short: "Map Drawing" },
+    { text: "Teach a younger kid something you learned this week 🧑‍🏫", emoji: "🧑‍🏫", short: "Be a Tutor" },
+    { text: "Do 30 minutes of a creative project — build, draw, or invent! 🎨", emoji: "🎨", short: "Creative Project" },
+    { text: "Write a letter to your future self 💌", emoji: "💌", short: "Future Letter" },
+    { text: "Practice a sport skill for 15 minutes ⚽", emoji: "⚽", short: "Sports Practice" },
+    { text: "Help make dinner tonight — chop, stir, or set the table 🍳", emoji: "🍳", short: "Dinner Helper" },
+    { text: "Organize your desk or study area 🗂️", emoji: "🗂️", short: "Organize Space" },
+    { text: "Learn a new card trick or magic trick 🎩", emoji: "🎩", short: "Magic Trick" },
+    { text: "Do a random act of kindness for someone today 💛", emoji: "💛", short: "Kindness Act" },
+  ],
+  adult: [
+    { text: "Take a shot (or a sip if you're classy) 🥃", emoji: "🥃", short: "Take a Shot" },
+    { text: "Text your ex something nice... just kidding. Text your mom instead 📱", emoji: "📱", short: "Text Mom" },
+    { text: "Do 20 push-ups. No excuses, you're not THAT old 💪", emoji: "💪", short: "Push-ups" },
+    { text: "Reveal your most embarrassing Google search 🔍", emoji: "🔍", short: "Google History" },
+    { text: "Let someone else post anything to your Instagram story 📸", emoji: "📸", short: "Story Takeover" },
+    { text: "Do your best sexy dance for 30 seconds. Full commitment. 💃", emoji: "💃", short: "Sexy Dance" },
+    { text: "Call a friend and tell them they're beautiful. No context. Hang up. 📞", emoji: "📞", short: "Random Call" },
+    { text: "Show the last photo in your camera roll to everyone 🫣", emoji: "🫣", short: "Last Photo" },
+    { text: "Send a voice note to someone saying 'I've been thinking about you' 😏", emoji: "😏", short: "Flirty Voice Note" },
+    { text: "Do a plank for 60 seconds. Your core is crying. 🧘", emoji: "🧘", short: "Plank Challenge" },
+    { text: "Eat something spicy without making a face 🌶️", emoji: "🌶️", short: "Spice Challenge" },
+    { text: "Give someone in the room your best pickup line 😘", emoji: "😘", short: "Pickup Line" },
+    { text: "Swap phones with someone for 2 minutes. Don't panic. 😱", emoji: "😱", short: "Phone Swap" },
+    { text: "Do a dramatic reading of your last text conversation 🎭", emoji: "🎭", short: "Dramatic Reading" },
+    { text: "Make up a rap about the person to your left. Perform it. 🎤", emoji: "🎤", short: "Freestyle Rap" },
+    { text: "Hold an ice cube in your hand until it melts. No dropping. 🧊", emoji: "🧊", short: "Ice Challenge" },
+    { text: "Demonstrate your O-face. Method acting only. 🎬", emoji: "🎬", short: "Acting Class" },
+    { text: "Venmo/Cash App someone $1 with the message 'last night was fun' 💸", emoji: "💸", short: "Suspicious Venmo" },
+    { text: "Let the group pick your profile pic for 24 hours 🤳", emoji: "🤳", short: "Profile Pic Dare" },
+    { text: "Describe your love life using only emojis. Let others guess. 💀", emoji: "💀", short: "Emoji Love Life" },
+  ],
 };
 
 function getChallengesForPlayer() {
   const grade = activePlayer ? activePlayer.grade : 2;
-  return grade <= 0 ? CHALLENGES_BY_AGE.young : CHALLENGES_BY_AGE.school;
+  if (grade >= 21) return CHALLENGES_BY_AGE.adult;
+  if (grade >= 3) return CHALLENGES_BY_AGE.upperElem;
+  if (grade >= 1) return CHALLENGES_BY_AGE.school;
+  return CHALLENGES_BY_AGE.young;
 }
 
 const PRIZES = [
@@ -2158,7 +2215,7 @@ const ZONES = [
 
 // ===== PROFILE SYSTEM =====
 const STORAGE_KEY = 'ryleighLand_profiles';
-const GRADE_LABELS = { '-1': 'Pre-K', '0': 'Kindergarten', '1': '1st Grade', '2': '2nd Grade' };
+const GRADE_LABELS = { '-1': 'Pre-K', '0': 'Kindergarten', '1': '1st Grade', '2': '2nd Grade', '3': '3rd Grade', '4': '4th Grade', '5': '5th Grade', '21': 'Adult Mode 🍺' };
 const AVATARS = ['🐺','🦄','🐱','🐶','🦊','🐼','🦋','🌟'];
 
 function defaultGameState() {
@@ -2298,14 +2355,18 @@ let formAge = null;
 let formAvatar = null;
 
 function ageToGrade(age) {
-  if (age <= 4) return -1;  // Pre-K: letter/number recognition
-  if (age <= 5) return 0;   // Kindergarten: letter/number recognition
-  if (age <= 6) return 1;   // 1st grade: single-digit math
-  return 2;                  // 2nd grade+: double-digit math
+  if (age >= 21) return 21;  // Adult mode 🍺
+  if (age <= 4) return -1;   // Pre-K
+  if (age <= 5) return 0;    // Kindergarten
+  if (age <= 6) return 1;    // 1st grade
+  if (age <= 7) return 2;    // 2nd grade
+  if (age <= 8) return 3;    // 3rd grade
+  if (age <= 9) return 4;    // 4th grade
+  return 5;                   // 5th grade+
 }
 
 function gradeLabel(grade) {
-  return GRADE_LABELS[String(grade)] || '2nd Grade';
+  return GRADE_LABELS[String(grade)] || '5th Grade';
 }
 
 function showNewPlayerForm() {
@@ -2928,6 +2989,12 @@ function shuffle(arr) {
 
 function generateProblem(grade) {
   const r = Math.random();
+  if (grade >= 21) {
+    // Adult: 40% trivia, 30% hard math, 30% adult spelling
+    if (r < 0.40) return generateAdultTrivia();
+    if (r < 0.70) return generateAdultMath();
+    return generateSpelling(21);
+  }
   if (grade <= 0) {
     // Pre-K/K: 35% number, 25% letter, 20% counting, 20% shape
     if (r < 0.35) return generateNumberRecognition();
@@ -2941,11 +3008,18 @@ function generateProblem(grade) {
     if (r < 0.70) return generateSpelling(1);
     return generatePattern(1);
   }
-  // 2nd: 35% math, 25% time, 20% spelling, 20% patterns
-  if (r < 0.35) return generateGrade2Math();
-  if (r < 0.60) return generateTellingTime();
-  if (r < 0.80) return generateSpelling(2);
-  return generatePattern(2);
+  if (grade === 2) {
+    // 2nd: 35% math, 25% time, 20% spelling, 20% patterns
+    if (r < 0.35) return generateGrade2Math();
+    if (r < 0.60) return generateTellingTime();
+    if (r < 0.80) return generateSpelling(2);
+    return generatePattern(2);
+  }
+  // 3rd-5th: 30% multiplication, 25% harder math, 25% spelling, 20% patterns
+  if (r < 0.30) return generateMultiplication(grade);
+  if (r < 0.55) return generateUpperMath(grade);
+  if (r < 0.80) return generateSpelling(grade);
+  return generatePattern(grade);
 }
 
 function generateLetterRecognition() {
@@ -3080,39 +3154,187 @@ const SPELLING_GRADE2 = [
   { word: 'every', emoji: '✨', wrongs: ['evrey', 'evry', 'evrye'] },
 ];
 
+const SPELLING_GRADE35 = [
+  { word: 'necessary', emoji: '📌', wrongs: ['neccessary', 'necesary', 'neccesary'] },
+  { word: 'separate', emoji: '✂️', wrongs: ['seperate', 'seprate', 'separite'] },
+  { word: 'believe', emoji: '🙏', wrongs: ['beleive', 'belive', 'beleeve'] },
+  { word: 'calendar', emoji: '📅', wrongs: ['calender', 'calander', 'calandar'] },
+  { word: 'different', emoji: '🔀', wrongs: ['diffrent', 'diferent', 'differant'] },
+  { word: 'favorite', emoji: '⭐', wrongs: ['favrite', 'favourit', 'favorit'] },
+  { word: 'library', emoji: '📚', wrongs: ['libary', 'liberry', 'libery'] },
+  { word: 'February', emoji: '❤️', wrongs: ['Febuary', 'Febrary', 'Feburary'] },
+];
+
+const SPELLING_ADULT = [
+  { word: 'diarrhea', emoji: '💩', wrongs: ['diarhea', 'diarrhoea', 'diarreah'] },
+  { word: 'embarrass', emoji: '😳', wrongs: ['embarass', 'embarras', 'embaress'] },
+  { word: 'conscience', emoji: '😇', wrongs: ['concience', 'consience', 'concsience'] },
+  { word: 'liaison', emoji: '😏', wrongs: ['liason', 'laison', 'liasion'] },
+  { word: 'rendezvous', emoji: '💋', wrongs: ['rendevous', 'randezvous', 'rendazvous'] },
+  { word: 'rhythm', emoji: '🎵', wrongs: ['rythm', 'rhythem', 'rythym'] },
+  { word: 'acquaintance', emoji: '🤝', wrongs: ['aquaintance', 'acquantance', 'acquaintence'] },
+  { word: 'hemorrhage', emoji: '🩸', wrongs: ['hemorage', 'hemmorhage', 'hemorrage'] },
+];
+
 function generateSpelling(grade) {
-  const words = grade <= 1 ? SPELLING_GRADE1 : SPELLING_GRADE2;
+  let words, numWrongs;
+  if (grade >= 21) { words = SPELLING_ADULT; numWrongs = 3; }
+  else if (grade >= 3) { words = SPELLING_GRADE35; numWrongs = 3; }
+  else if (grade >= 2) { words = SPELLING_GRADE2; numWrongs = 3; }
+  else { words = SPELLING_GRADE1; numWrongs = 2; }
   const w = words[Math.floor(Math.random() * words.length)];
-  const numWrongs = grade <= 1 ? 2 : 3;
   const wrongs = shuffle(w.wrongs).slice(0, numWrongs);
   return { question: `${w.emoji} How do you spell this?`, display: w.word.toUpperCase(), choices: shuffle([w.word, ...wrongs]), answer: w.word };
 }
 
+// ===== ADULT PROBLEMS =====
+const ADULT_TRIVIA = [
+  { q: "How many US Presidents have been impeached?", a: "3", choices: ["1","2","3","4"] },
+  { q: "What's the boiling point of water in Fahrenheit?", a: "212", choices: ["200","212","220","100"] },
+  { q: "What % alcohol is 80-proof vodka?", a: "40%", choices: ["40%","50%","80%","20%"] },
+  { q: "How many bones in the adult human body?", a: "206", choices: ["206","208","186","212"] },
+  { q: "What's the legal BAC limit for driving?", a: "0.08", choices: ["0.05","0.08","0.10","0.12"] },
+  { q: "How many calories in a standard glass of wine?", a: "125", choices: ["80","125","175","200"] },
+  { q: "What year was Tinder launched?", a: "2012", choices: ["2010","2012","2014","2009"] },
+  { q: "How many tequila shots in a standard bottle?", a: "33", choices: ["20","25","33","40"] },
+  { q: "What's the most Googled 'how to' question?", a: "How to tie a tie", choices: ["How to tie a tie","How to kiss","How to cook rice","How to lose weight"] },
+  { q: "Average amount of times adults swear per day?", a: "80", choices: ["20","50","80","120"] },
+  { q: "What body part never stops growing?", a: "Nose & ears", choices: ["Nose & ears","Fingernails","Hair","Feet"] },
+  { q: "How many muscles does it take to frown?", a: "43", choices: ["11","26","43","17"] },
+  { q: "What's the most common lie people tell?", a: "I'm fine", choices: ["I'm fine","I'm on my way","I'm busy","I love it"] },
+  { q: "How many hours does the average adult sleep?", a: "6.8", choices: ["6.8","7.5","8.0","5.5"] },
+];
+
+function generateAdultTrivia() {
+  const t = ADULT_TRIVIA[Math.floor(Math.random() * ADULT_TRIVIA.length)];
+  return { question: t.q, display: '', choices: shuffle([...t.choices]), answer: t.a };
+}
+
+function generateAdultMath() {
+  const ops = ['+','-','×'];
+  const op = ops[Math.floor(Math.random() * ops.length)];
+  let a, b, answer;
+  if (op === '×') {
+    a = Math.floor(Math.random() * 12) + 2;
+    b = Math.floor(Math.random() * 12) + 2;
+    answer = a * b;
+  } else if (op === '+') {
+    a = Math.floor(Math.random() * 500) + 50;
+    b = Math.floor(Math.random() * 500) + 50;
+    answer = a + b;
+  } else {
+    a = Math.floor(Math.random() * 500) + 100;
+    b = Math.floor(Math.random() * (a - 10)) + 10;
+    answer = a - b;
+  }
+  return { question: `${a} ${op} ${b} = ?`, display: '', choices: genNumberChoices(answer, 4, Math.max(0, answer - 50), answer + 50), answer: String(answer) };
+}
+
+function generateMultiplication(grade) {
+  let a, b;
+  if (grade <= 3) {
+    a = Math.floor(Math.random() * 10) + 2;
+    b = Math.floor(Math.random() * 10) + 2;
+  } else if (grade <= 4) {
+    a = Math.floor(Math.random() * 12) + 2;
+    b = Math.floor(Math.random() * 12) + 2;
+  } else {
+    a = Math.floor(Math.random() * 12) + 3;
+    b = Math.floor(Math.random() * 15) + 2;
+  }
+  const answer = a * b;
+  return { question: `${a} × ${b} = ?`, display: '', choices: genNumberChoices(answer, 4, Math.max(0, answer - 20), answer + 20), answer: String(answer) };
+}
+
+function generateUpperMath(grade) {
+  const r = Math.random();
+  let a, b, op, answer;
+  if (grade <= 3) {
+    // 3rd grade: 3-digit + 2-digit, or subtraction
+    if (r < 0.5) {
+      a = Math.floor(Math.random() * 400) + 100;
+      b = Math.floor(Math.random() * 90) + 10;
+      op = '+'; answer = a + b;
+    } else {
+      a = Math.floor(Math.random() * 400) + 200;
+      b = Math.floor(Math.random() * 150) + 10;
+      op = '-'; answer = a - b;
+    }
+  } else if (grade <= 4) {
+    // 4th grade: larger numbers, some division
+    if (r < 0.4) {
+      a = Math.floor(Math.random() * 900) + 100;
+      b = Math.floor(Math.random() * 900) + 100;
+      op = '+'; answer = a + b;
+    } else if (r < 0.7) {
+      a = Math.floor(Math.random() * 900) + 200;
+      b = Math.floor(Math.random() * (a - 50)) + 50;
+      op = '-'; answer = a - b;
+    } else {
+      b = Math.floor(Math.random() * 9) + 2;
+      answer = Math.floor(Math.random() * 12) + 2;
+      a = b * answer;
+      op = '÷';
+    }
+  } else {
+    // 5th grade: mixed with bigger numbers
+    if (r < 0.35) {
+      a = Math.floor(Math.random() * 5000) + 1000;
+      b = Math.floor(Math.random() * 3000) + 500;
+      op = '+'; answer = a + b;
+    } else if (r < 0.6) {
+      a = Math.floor(Math.random() * 5000) + 2000;
+      b = Math.floor(Math.random() * (a - 100)) + 100;
+      op = '-'; answer = a - b;
+    } else {
+      b = Math.floor(Math.random() * 11) + 2;
+      answer = Math.floor(Math.random() * 15) + 2;
+      a = b * answer;
+      op = '÷';
+    }
+  }
+  return { question: `${a} ${op} ${b} = ?`, display: '', choices: genNumberChoices(answer, 4, Math.max(0, answer - 30), answer + 30), answer: String(answer) };
+}
+
 function generatePattern(grade) {
   if (grade <= 1) {
-    // Simple counting patterns
     const patterns = [
-      { seq: [2,4,6], answer: 8, label: '2, 4, 6, ?' },
-      { seq: [1,2,3], answer: 4, label: '1, 2, 3, ?' },
-      { seq: [5,10,15], answer: 20, label: '5, 10, 15, ?' },
-      { seq: [3,6,9], answer: 12, label: '3, 6, 9, ?' },
-      { seq: [1,3,5], answer: 7, label: '1, 3, 5, ?' },
-      { seq: [10,20,30], answer: 40, label: '10, 20, 30, ?' },
+      { answer: 8, label: '2, 4, 6, ?' },
+      { answer: 4, label: '1, 2, 3, ?' },
+      { answer: 20, label: '5, 10, 15, ?' },
+      { answer: 12, label: '3, 6, 9, ?' },
+      { answer: 7, label: '1, 3, 5, ?' },
+      { answer: 40, label: '10, 20, 30, ?' },
     ];
     const p = patterns[Math.floor(Math.random() * patterns.length)];
     return { question: 'What comes next?', display: p.label, choices: genNumberChoices(p.answer, 3, Math.max(0, p.answer - 5), p.answer + 5), answer: String(p.answer) };
-  } else {
-    // Grade 2: harder patterns
+  } else if (grade <= 2) {
     const patterns = [
-      { seq: [5,10,15,20], answer: 25, label: '5, 10, 15, 20, ?' },
-      { seq: [3,6,9,12], answer: 15, label: '3, 6, 9, 12, ?' },
-      { seq: [4,8,12,16], answer: 20, label: '4, 8, 12, 16, ?' },
-      { seq: [7,14,21], answer: 28, label: '7, 14, 21, ?' },
-      { seq: [100,90,80], answer: 70, label: '100, 90, 80, ?' },
-      { seq: [50,45,40,35], answer: 30, label: '50, 45, 40, 35, ?' },
+      { answer: 25, label: '5, 10, 15, 20, ?' },
+      { answer: 15, label: '3, 6, 9, 12, ?' },
+      { answer: 20, label: '4, 8, 12, 16, ?' },
+      { answer: 28, label: '7, 14, 21, ?' },
+      { answer: 70, label: '100, 90, 80, ?' },
+      { answer: 30, label: '50, 45, 40, 35, ?' },
     ];
     const p = patterns[Math.floor(Math.random() * patterns.length)];
     return { question: 'What comes next?', display: p.label, choices: genNumberChoices(p.answer, 4, Math.max(0, p.answer - 10), p.answer + 10), answer: String(p.answer) };
+  } else {
+    // Grades 3-5+: multiplication patterns, squares, harder sequences
+    const patterns = [
+      { answer: 36, label: '6, 12, 18, 24, 30, ?' },
+      { answer: 56, label: '8, 16, 24, 32, 48, ?' },
+      { answer: 64, label: '1, 4, 9, 16, 25, 36, 49, ?' },
+      { answer: 128, label: '2, 4, 8, 16, 32, 64, ?' },
+      { answer: 243, label: '3, 9, 27, 81, ?' },
+      { answer: 144, label: '12, 24, 48, 96, ?' },
+      { answer: 89, label: '1, 1, 2, 3, 5, 8, 13, 21, 34, 55, ?' },
+      { answer: 625, label: '5, 25, 125, ?' },
+      { answer: 45, label: '9, 18, 27, 36, ?' },
+      { answer: 1000, label: '200, 400, 600, 800, ?' },
+    ];
+    const p = patterns[Math.floor(Math.random() * patterns.length)];
+    return { question: 'What comes next?', display: p.label, choices: genNumberChoices(p.answer, 4, Math.max(0, p.answer - 30), p.answer + 30), answer: String(p.answer) };
   }
 }
 
