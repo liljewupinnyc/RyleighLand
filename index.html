@@ -3372,8 +3372,8 @@ function generateSpelling(grade) {
   const w = words[Math.floor(Math.random() * words.length)];
   const wrongs = shuffle(w.wrongs).slice(0, numWrongs);
   if (grade >= 21) {
-    // Adults: show choices with timer
-    return { question: `Spell this word:`, display: w.emoji, choices: shuffle([w.word, ...wrongs]), answer: w.word, timer: 10 };
+    // Adults: hide choices until timer expires
+    return { question: `Spell this word:`, display: w.emoji, choices: shuffle([w.word, ...wrongs]), answer: w.word, voiceOnly: true, timer: 10 };
   }
   // Kids: show the word to read aloud, with spelling choices as backup
   return { question: `🎤 Click the microphone and read this word!`, display: w.word.toUpperCase(), choices: shuffle([w.word, ...wrongs]), answer: w.word };
@@ -3399,7 +3399,7 @@ const ADULT_TRIVIA = [
 
 function generateAdultTrivia() {
   const t = ADULT_TRIVIA[Math.floor(Math.random() * ADULT_TRIVIA.length)];
-  return { question: t.q, display: '🧠', choices: shuffle([...t.choices]), answer: t.a, timer: 10 };
+  return { question: t.q, display: '🧠', choices: shuffle([...t.choices]), answer: t.a, voiceOnly: true, timer: 10 };
 }
 
 function generateAdultMath() {
@@ -3419,7 +3419,7 @@ function generateAdultMath() {
     b = Math.floor(Math.random() * (a - 10)) + 10;
     answer = a - b;
   }
-  return { question: `${a} ${op} ${b} = ?`, display: '', choices: genNumberChoices(answer, 4, Math.max(0, answer - 50), answer + 50), answer: String(answer), timer: 15 };
+  return { question: `${a} ${op} ${b} = ?`, display: '', choices: genNumberChoices(answer, 4, Math.max(0, answer - 50), answer + 50), answer: String(answer), voiceOnly: true, timer: 15 };
 }
 
 function generateMultiplication(grade) {
@@ -4141,37 +4141,20 @@ function handleTimerExpired() {
   const numberEl = document.getElementById('countdownNumber');
   const labelEl = document.getElementById('countdownLabel');
   numberEl.textContent = '0';
-  labelEl.textContent = '⏰ Time\'s up!';
+  labelEl.textContent = '⏰ Time\'s up! Now pick your answer!';
   labelEl.className = 'countdown-label countdown-expired';
 
-  // Count as wrong — no answer given
-  state.mathTotal++;
-  state.mathStreak = 0;
-  saveState();
-  document.getElementById('mathScore').textContent = `Score: ${state.mathCorrect}/${state.mathTotal}`;
-  showAdultInsult();
-
-  // Show the answer briefly, then reveal choices as fallback
+  // Don't count as wrong yet — reveal choices and let them answer
   const micStatus = document.getElementById('micStatus');
-  micStatus.textContent = 'Answer: ' + currentProblem.answer;
-  micStatus.className = 'mic-status error';
+  micStatus.textContent = '';
 
-  // Show choices so they can proceed
+  // Remove voice-only mode so choices appear
+  document.querySelector('.math-card').classList.remove('voice-only-mode');
   const choicesEl = document.getElementById('mathChoices');
   choicesEl.style.display = '';
-  document.querySelectorAll('.math-choice-btn').forEach(b => b.disabled = true);
-  // Highlight the correct answer
-  document.querySelectorAll('.math-choice-btn').forEach(b => {
-    if (String(b.textContent) === String(currentProblem.answer)) {
-      b.classList.add('correct');
-    }
-  });
-
-  setTimeout(() => {
-    document.getElementById('mathOverlay').classList.remove('active');
-    document.querySelector('.math-card').classList.remove('voice-only-mode');
-    if (mathCallback) { mathCallback(); mathCallback = null; }
-  }, 2000);
+  // Re-enable choice buttons so they can pick
+  document.querySelectorAll('.math-choice-btn').forEach(b => b.disabled = false);
+  // No auto-dismiss — player picks an answer from the revealed choices
 }
 
 // ===== MODALS =====
