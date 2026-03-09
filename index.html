@@ -1055,8 +1055,26 @@ body {
 .welcome-subtitle {
   font-size: 1rem;
   color: rgba(255,255,255,0.85);
-  margin-bottom: 24px;
+  margin-bottom: 10px;
   text-align: center;
+}
+.how-to-play-btn {
+  font-family: 'Fredoka One', cursive;
+  font-size: 0.85rem;
+  padding: 8px 22px;
+  border: 2px solid rgba(255,255,255,0.5);
+  border-radius: 50px;
+  background: rgba(255,255,255,0.15);
+  color: white;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: all 0.2s;
+  margin-bottom: 20px;
+  letter-spacing: 0.5px;
+}
+.how-to-play-btn:active {
+  background: rgba(255,255,255,0.3);
+  transform: scale(0.95);
 }
 .player-cards {
   display: flex;
@@ -1907,7 +1925,8 @@ body {
 <!-- WELCOME SCREEN -->
 <div class="welcome-overlay" id="welcomeScreen">
   <div class="welcome-title">🐺 Ryleigh Land 🌲</div>
-  <div class="welcome-subtitle">Choose your adventurer! <span style="cursor:pointer;margin-left:6px;opacity:0.7" onclick="showIntro()">ℹ️</span></div>
+  <div class="welcome-subtitle">Choose your adventurer!</div>
+  <button class="how-to-play-btn" onclick="showIntro()">📖 How to Play</button>
   <div class="player-cards" id="playerCards"></div>
   <button class="new-player-btn" id="newPlayerBtn" onclick="showNewPlayerForm()">+ New Player</button>
   <div class="new-player-form" id="newPlayerForm">
