@@ -3174,39 +3174,63 @@ function shuffle(arr) {
   return a;
 }
 
+let lastProblemType = null;
+
+function pickAvoidingRepeat(generators) {
+  // generators: [{type, fn, weight}] — pick randomly by weight, but avoid lastProblemType
+  const available = generators.filter(g => g.type !== lastProblemType);
+  const pool = available.length > 0 ? available : generators;
+  const totalWeight = pool.reduce((s, g) => s + g.weight, 0);
+  let r = Math.random() * totalWeight;
+  for (const g of pool) {
+    r -= g.weight;
+    if (r <= 0) {
+      lastProblemType = g.type;
+      return g.fn();
+    }
+  }
+  lastProblemType = pool[pool.length - 1].type;
+  return pool[pool.length - 1].fn();
+}
+
 function generateProblem(grade) {
-  const r = Math.random();
   if (grade >= 21) {
-    // Adult: 40% trivia, 30% hard math, 30% adult spelling
-    if (r < 0.40) return generateAdultTrivia();
-    if (r < 0.70) return generateAdultMath();
-    return generateSpelling(21);
+    return pickAvoidingRepeat([
+      { type: 'adultTrivia', fn: generateAdultTrivia, weight: 40 },
+      { type: 'adultMath', fn: generateAdultMath, weight: 30 },
+      { type: 'adultSpelling', fn: () => generateSpelling(21), weight: 30 },
+    ]);
   }
   if (grade <= 0) {
-    // Pre-K/K: 35% number, 25% letter, 20% counting, 20% shape
-    if (r < 0.35) return generateNumberRecognition();
-    if (r < 0.60) return generateLetterRecognition();
-    if (r < 0.80) return generateCounting();
-    return generateShapeRecognition();
+    return pickAvoidingRepeat([
+      { type: 'number', fn: generateNumberRecognition, weight: 35 },
+      { type: 'letter', fn: generateLetterRecognition, weight: 25 },
+      { type: 'counting', fn: generateCounting, weight: 20 },
+      { type: 'shape', fn: generateShapeRecognition, weight: 20 },
+    ]);
   }
   if (grade === 1) {
-    // 1st: 40% math, 30% spelling, 30% patterns
-    if (r < 0.40) return generateGrade1Math();
-    if (r < 0.70) return generateSpelling(1);
-    return generatePattern(1);
+    return pickAvoidingRepeat([
+      { type: 'math', fn: generateGrade1Math, weight: 40 },
+      { type: 'spelling', fn: () => generateSpelling(1), weight: 30 },
+      { type: 'pattern', fn: () => generatePattern(1), weight: 30 },
+    ]);
   }
   if (grade === 2) {
-    // 2nd: 35% math, 25% time, 20% spelling, 20% patterns
-    if (r < 0.35) return generateGrade2Math();
-    if (r < 0.60) return generateTellingTime();
-    if (r < 0.80) return generateSpelling(2);
-    return generatePattern(2);
+    return pickAvoidingRepeat([
+      { type: 'math', fn: generateGrade2Math, weight: 35 },
+      { type: 'time', fn: generateTellingTime, weight: 25 },
+      { type: 'spelling', fn: () => generateSpelling(2), weight: 20 },
+      { type: 'pattern', fn: () => generatePattern(2), weight: 20 },
+    ]);
   }
-  // 3rd-5th: 30% multiplication, 25% harder math, 25% spelling, 20% patterns
-  if (r < 0.30) return generateMultiplication(grade);
-  if (r < 0.55) return generateUpperMath(grade);
-  if (r < 0.80) return generateSpelling(grade);
-  return generatePattern(grade);
+  // 3rd-5th
+  return pickAvoidingRepeat([
+    { type: 'multiplication', fn: () => generateMultiplication(grade), weight: 30 },
+    { type: 'upperMath', fn: () => generateUpperMath(grade), weight: 25 },
+    { type: 'spelling', fn: () => generateSpelling(grade), weight: 25 },
+    { type: 'pattern', fn: () => generatePattern(grade), weight: 20 },
+  ]);
 }
 
 function generateLetterRecognition() {
